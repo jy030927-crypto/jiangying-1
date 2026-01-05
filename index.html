@@ -3,812 +3,3605 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的小手机</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>小霁的小手机</title>
+    <!-- 动态聊天样式注入点 -->
+    <style id="dynamic-chat-style"></style>
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", sans-serif;
-            background: #e0e5ec;
-            min-height: 100vh;
+            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Helvetica, Arial, sans-serif;
         }
 
-        /* 页面切换容器 */
-        .page-view {
-            transition: opacity 0.3s ease;
-        }
-
-        /* 手机容器通用样式 */
-        .iphone-container {
-            width: 375px;
-            height: 750px;
-            border-radius: 30px;
-            box-shadow: 
-                0 0 0 8px #1f1f1f,
-                20px 20px 40px rgba(0,0,0,0.2);
+        /* 手机屏幕容器 */
+        .phone-screen {
+            width: 390px;
+            height: 844px;
+            background-color: #FFECF0; /* ①号界面淡粉色 */
             position: relative;
             overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* 全局 Home Indicator */
+        .home-indicator-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .home-indicator {
+            width: 130px;
+            height: 5px;
+            background-color: rgba(0,0,0,0.3);
+            border-radius: 100px;
+            transition: background-color 0.3s;
+        }
+        .app-active .home-indicator {
+            background-color: #1a1a1a;
+        }
+
+        /* ----- 桌面容器 ----- */
+        #desktop {
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            color: #333;
+            padding: 100px 25px 30px;
+            gap: 30px;
+            transition: transform 0.3s ease;
         }
 
-        /* 主页特定样式 */
-        .home-style {
-            background: linear-gradient(180deg, #f0f4f8 0%, #d9e2ec 100%);
-            padding-top: 20px;
-        }
-
-        /* 纪念日页特定样式 */
-        .memo-style {
-            background: #fff;
-        }
-
-        /* 状态栏 - 简化 */
-        .status-bar {
-            height: 30px;
+        /* 顶部毛玻璃卡片 */
+        .glass-card {
             width: 100%;
+            height: 180px;
+            background: rgba(255, 250, 252, 0.45);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 32px 0 rgba(236, 184, 199, 0.15);
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 0 25px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 10px;
+            padding: 20px;
+            gap: 20px;
+            flex-shrink: 0;
+        }
+
+        .avatar-wrapper {
+            width: 100px;
+            height: 100px;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        .avatar-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            border: 3px solid #fff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            color: #dcb0ba;
+            font-weight: bold;
+            font-size: 18px;
+            background-size: cover;
+            background-position: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .input-group {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .custom-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.6);
+            padding: 8px 0;
+            font-size: 16px;
+            color: #555;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .custom-input:focus { border-bottom-color: #ffb7c5; }
+
+        /* 中部区域 */
+        .middle-section {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            flex-grow: 1; /* 填充空间 */
+            align-items: flex-start;
+        }
+
+        /* 桌面备忘录小组件 */
+        .widget-memo {
+            width: 155px;
+            height: 155px;
+            background-color: #fffdf5;
+            border-radius: 25px;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.1s;
+        }
+        .widget-memo:active { transform: scale(0.95); }
+
+        .widget-memo-content-layer {
+            position: relative;
+            z-index: 2;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .widget-memo-title { display: none; }
+        .widget-memo-text { display: none; }
+
+        /* App Grid */
+        .app-grid-2x2 {
+            flex-grow: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 60px 60px;
+            gap: 35px;
+            justify-items: center;
+            align-items: start;
+        }
+
+        .app-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            width: 60px;
+            cursor: pointer;
+        }
+        .app-icon {
+            width: 60px; height: 60px;
+            border-radius: 14px;
+            background-color: #fff;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: relative;
+        }
+        .app-name {
+            font-size: 11px; color: #555;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.5);
+            text-align: center; width: 70px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        
+        /* 微信未读红点 */
+        .badge {
+            position: absolute;
+            top: -5px; right: -5px;
+            background-color: #ff3b30;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            height: 18px;
+            min-width: 18px;
+            border-radius: 9px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 4px;
+            border: 1px solid white;
+        }
+
+        .icon-wechat { background: linear-gradient(135deg, #09b83e, #059632); }
+        .icon-worldbook { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .icon-settings-app { background: linear-gradient(135deg, #8c9299, #545960); }
+        .icon-themes { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+        .icon-placeholder { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); }
+        .icon-placeholder.empty { background: rgba(255,255,255,0.4); border: 2px dashed rgba(255,255,255,0.8); box-shadow: none; }
+
+        .app-icon svg { width: 34px; height: 34px; fill: white; }
+
+        /* Dock Bar */
+        .dock-bar {
+            position: absolute;
+            bottom: 25px;
+            left: 20px;
+            right: 20px;
+            height: 90px;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 35px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.2);
             z-index: 10;
         }
 
-        /* ================== 主页样式 ================== */
-        .top-section { padding: 0 25px; margin-bottom: 25px; }
-        .header-card {
-            width: 100%; height: 200px;
-            background: rgba(255, 255, 255, 0.65);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
-            border-radius: 25px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-            border: 1px solid rgba(255,255,255,0.4);
-            display: flex; flex-direction: column;
-            justify-content: center; align-items: center;
-            gap: 20px;
+        /* ================= App 容器通用样式 ================= */
+        .app-container {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
         }
-        .avatar {
-            width: 90px; height: 90px;
+        .app-container.active { transform: translateX(0); }
+
+        /* ----- 备忘录 App ----- */
+        #memo-app { background-color: #FFECF0; }
+
+        .app-header {
+            height: 100px;
+            padding: 50px 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            background: rgba(255, 236, 240, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+        }
+        .header-btn {
+            color: #dcb0ba;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .header-title { font-size: 18px; font-weight: bold; color: #333; }
+
+        .memo-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 20px 20px 100px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .memo-item {
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.2s, background 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .memo-item:active { transform: scale(0.98); background: #fdfdfd; }
+        .memo-item.pinned { border-left: 4px solid #f5bd42; }
+
+        .memo-select-circle {
+            width: 22px; height: 22px;
             border-radius: 50%;
-            background: url('https://api.dicebear.com/7.x/avataaars/svg?seed=Felix') no-repeat center center;
-            background-size: cover; background-color: #fff;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border: 4px solid white;
+            border: 2px solid #ddd;
+            display: none;
+            flex-shrink: 0;
+        }
+        .memo-item.selected .memo-select-circle {
+            background-color: #dcb0ba;
+            border-color: #dcb0ba;
+            position: relative;
+        }
+        .memo-item.selected .memo-select-circle::after {
+            content: "✓"; color: white;
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+        }
+        .memo-list.selection-mode .memo-select-circle { display: block; }
+
+        .memo-info { flex-grow: 1; min-width: 0; }
+        .memo-item-title { font-weight: bold; font-size: 16px; margin-bottom: 4px; color: #333; }
+        .memo-item-preview { font-size: 13px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .memo-item-date { font-size: 11px; color: #aaa; margin-top: 5px; }
+
+        .app-footer {
+            height: 80px;
+            background: rgba(255, 236, 240, 0.95);
+            border-top: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+        .create-memo-btn {
+            width: 90%;
+            height: 44px;
+            background: #dcb0ba;
+            border-radius: 22px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(220, 176, 186, 0.4);
             cursor: pointer;
         }
-        .input-box {
-            width: 80%; height: 40px;
-            background: #fff; border-radius: 20px;
-            padding: 0 20px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
-            color: #333; font-size: 14px;
-            border: 1px solid rgba(0,0,0,0.05);
-            outline: none; text-align: center;
-            transition: border-color 0.3s;
+        .selection-footer {
+            display: none; width: 100%; justify-content: space-between; padding: 0 30px;
+            color: #dcb0ba; font-weight: 500;
         }
-        .input-box:focus { border-color: #aaa; }
-        
-        .memorial-link {
-            display: block; width: 100%; text-decoration: none;
-            transition: transform 0.2s; position: relative; cursor: pointer;
-        }
-        .memorial-link:active { transform: scale(0.96); }
-        .memorial-img {
-            width: 100%; aspect-ratio: 1/1.2; object-fit: cover;
-            border-radius: 20px; box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            border: 4px solid #fff;
-        }
-        .memorial-info-overlay {
-            position: absolute; bottom: 10px; left: 10px; right: 10px;
-            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(4px);
-            padding: 8px; border-radius: 12px; text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            animation: fadeIn 0.5s ease;
-        }
-        .memorial-title {
-            font-size: 12px; color: #555; margin-bottom: 2px;
-            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .memorial-days {
-            font-size: 20px; font-weight: 800; color: #FF9A9E; line-height: 1;
-        }
-        .memorial-days small { font-size: 10px; color: #888; font-weight: normal; }
-        
-        .main-content {
-            flex: 1; display: flex; padding: 0 25px; gap: 20px; align-items: flex-start;
-        }
-        .left-panel { width: 45%; display: flex; flex-direction: column; }
-        .right-panel {
-            flex: 1; display: grid; grid-template-columns: repeat(2, 1fr);
-            gap: 15px; align-content: start;
-        }
-        .app-item {
-            display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
-        }
-        .app-icon {
-            width: 55px; height: 55px; border-radius: 14px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 24px; color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            transition: transform 0.2s; position: relative;
-        }
-        .app-icon::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 14px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%);
-            pointer-events: none;
-        }
-        .app-item:hover .app-icon { transform: translateY(-2px); }
-        .app-item:active .app-icon { transform: scale(0.95); }
-        .app-name { font-size: 11px; color: #444; font-weight: 500; }
-        
-        .icon-wechat { background: linear-gradient(135deg, #09B83E, #079632); }
-        .icon-world { background: linear-gradient(135deg, #2b5876, #4e4376); }
-        .icon-settings { background: linear-gradient(135deg, #8E9EAB, #eef2f3); color: #555; }
-        .icon-beautify { background: linear-gradient(135deg, #FF9A9E, #FECFEF); }
-        
-        .dock-container { padding: 20px; display: flex; justify-content: center; margin-bottom: 10px; }
-        .dock {
-            width: 320px; height: 90px;
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            border-radius: 30px; display: flex; justify-content: space-evenly;
-            align-items: center;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.05); border: 1px solid rgba(255,255,255,0.3);
-        }
-        .dock-item {
-            width: 65px; height: 65px; border-radius: 16px;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 28px; color: white;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            transition: all 0.2s ease; cursor: pointer; position: relative;
-        }
-        .dock-item::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 50%);
-            pointer-events: none;
-        }
-        .dock-item:hover { transform: translateY(-5px); }
-        .dock-item:active { transform: scale(0.95); }
-        .icon-phone { background: linear-gradient(135deg, #42e695, #3bb2b8); }
-        .icon-novel { background: linear-gradient(135deg, #F6D365, #FDA085); }
-        .icon-forum { background: linear-gradient(135deg, #84fab0, #8fd3f4); }
+        .app-footer.selection-mode .create-memo-btn { display: none; }
+        .app-footer.selection-mode .selection-footer { display: flex; }
 
-        /* ================== 纪念日页样式 ================== */
-        .header {
-            padding: 20px 25px; height: 80px;
-            display: flex; align-items: center; justify-content: space-between;
-            background: rgba(255,255,255,0.8); backdrop-filter: blur(10px);
-            z-index: 20; position: relative;
+        /* ----- 设置 App ----- */
+        #settings-app { background-color: #f2f2f7; }
+        #settings-app .app-header { background: #f2f2f7; border-bottom: 1px solid #c6c6c8; }
+        
+        .settings-group {
+            margin-top: 20px;
+            background: #fff;
+            border-top: 1px solid #c6c6c8;
+            border-bottom: 1px solid #c6c6c8;
+            padding-left: 20px;
         }
-        .nav-btn {
-            font-size: 24px; color: #333; text-decoration: none;
-            width: 40px; height: 40px;
+        .settings-row {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px 12px 0;
+            border-bottom: 1px solid #c6c6c8;
+            font-size: 17px;
+        }
+        .settings-row:last-child { border-bottom: none; }
+        .settings-label { width: 100px; color: #000; }
+        .settings-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            text-align: right;
+            font-size: 17px;
+            color: #8e8e93;
+            background: transparent;
+            font-family: inherit;
+        }
+
+        /* ----- 微信 App ----- */
+        #wechat-app { background-color: #ededed; display: flex; flex-direction: column; }
+        
+        .wechat-pages {
+            flex-grow: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+        }
+        
+        .wechat-page {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0; left: 0;
+            display: none;
+            flex-direction: column;
+            background-color: #ededed;
+        }
+        .wechat-page.active { display: flex; }
+
+        /* 微信头部 */
+        .wechat-header {
+            height: 90px;
+            background: #ededed;
+            padding: 45px 15px 10px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid #dcdcdc;
+            position: relative;
+            z-index: 10;
+        }
+        .wechat-back-btn {
+            font-size: 18px; color: #000; margin-right: 10px; cursor: pointer;
+            padding: 5px; font-weight: bold;
+        }
+        .wechat-title { font-size: 17px; font-weight: 600; color: #000; flex-grow: 1; }
+        .wechat-header-icons { display: flex; gap: 15px; }
+        .wechat-icon { width: 24px; height: 24px; fill: #000; }
+
+        /* 微信右上角菜单 */
+        #wechat-plus-menu {
+            position: absolute;
+            top: 90px; right: 10px;
+            background: #4c4c4c;
+            border-radius: 6px;
+            padding: 0;
+            display: none;
+            flex-direction: column;
+            z-index: 200;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            width: 150px;
+        }
+        #wechat-plus-menu.active { display: flex; }
+        #wechat-plus-menu::before {
+            content: ""; position: absolute; top: -6px; right: 15px;
+            border-left: 6px solid transparent; border-right: 6px solid transparent;
+            border-bottom: 6px solid #4c4c4c;
+        }
+        .wechat-menu-item {
+            padding: 12px 15px;
+            color: #fff;
+            font-size: 14px;
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 1px solid #5d5d5d;
+            cursor: pointer;
+        }
+        .wechat-menu-item:last-child { border-bottom: none; }
+        .wechat-menu-item:active { background: #5d5d5d; }
+        .wechat-menu-icon { width: 20px; height: 20px; fill: #fff; }
+
+        /* 微信添加好友弹窗 */
+        #wechat-input-modal-mask {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 1001;
+            display: none; justify-content: center; align-items: center;
+        }
+        #wechat-input-modal-mask.active { display: flex; }
+        .wechat-input-box {
+            width: 280px; background: #fff; border-radius: 8px; overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+        .wechat-input-header { padding: 20px; text-align: center; font-weight: 600; font-size: 17px; }
+        .wechat-input-body { padding: 0 20px 20px; }
+        .wechat-name-input {
+            width: 100%; height: 40px; background: #f5f5f5; border: none; padding: 10px;
+            outline: none; font-size: 16px; border-radius: 4px;
+        }
+        .wechat-input-footer { display: flex; border-top: 1px solid #eee; }
+        .wechat-input-btn {
+            flex: 1; padding: 15px; text-align: center; font-size: 17px;
+            border-right: 1px solid #eee; cursor: pointer; color: #576b95; font-weight: 600;
+        }
+        .wechat-input-btn:last-child { border-right: none; }
+        .wechat-input-btn.cancel { color: #000; font-weight: 400; }
+
+        /* 微信聊天设置弹窗 (人设) */
+        #wechat-settings-modal {
+            position: absolute;
+            top: 5%; left: 5%; right: 5%; bottom: 5%;
+            background: #f7f7f7;
+            border-radius: 12px;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+            box-shadow: 0 0 50px rgba(0,0,0,0.2);
+            overflow: hidden;
+            transform: scale(0.95);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #wechat-settings-modal.active { display: flex; transform: scale(1); opacity: 1; }
+        
+        .ws-header {
+            height: 50px; background: #fff; border-bottom: 1px solid #eee;
             display: flex; align-items: center; justify-content: center;
-            cursor: pointer; border: none; background: none; position: relative;
+            font-weight: 600; font-size: 17px; flex-shrink: 0;
         }
-        .page-title {
-            font-size: 20px; font-weight: 600; letter-spacing: 1px;
-            display: flex; align-items: center; justify-content: center; flex: 1;
+        .ws-body {
+            flex-grow: 1; overflow-y: auto; padding: 20px;
+            display: flex; flex-direction: column; gap: 20px;
         }
-        .dropdown-menu {
-            position: absolute; top: 60px; right: 20px;
-            background: white; border-radius: 15px;
-            padding: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            width: 160px; display: none; flex-direction: column;
+        
+        .ws-section-title { font-size: 13px; color: #888; margin-bottom: 5px; margin-left: 5px; }
+        .ws-card { background: #fff; border-radius: 8px; overflow: hidden; }
+        .ws-row {
+            display: flex; align-items: center; padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .ws-row:last-child { border-bottom: none; }
+        .ws-label { width: 80px; font-size: 16px; }
+        .ws-value { flex-grow: 1; font-size: 16px; color: #333; }
+        .ws-input {
+            width: 100%; border: none; outline: none; font-size: 16px;
+            font-family: inherit; color: #333; text-align: right;
+        }
+        .ws-textarea {
+            width: 100%; border: none; outline: none; font-size: 15px;
+            font-family: inherit; color: #333; resize: none; min-height: 80px;
+            background: transparent;
+        }
+        
+        .ws-avatar-preview {
+            width: 40px; height: 40px; border-radius: 4px; background: #ddd;
+            display: flex; justify-content: center; align-items: center;
+            margin-left: auto; color: white; overflow: hidden;
+        }
+        
+        .ws-footer {
+            height: 60px; background: #fff; border-top: 1px solid #eee;
+            display: flex; align-items: center; justify-content: space-around;
+            flex-shrink: 0;
+        }
+        .ws-btn {
+            padding: 10px 20px; border-radius: 6px; font-size: 16px; cursor: pointer;
+            min-width: 80px; text-align: center;
+        }
+        .ws-btn.cancel { color: #555; background: #f0f0f0; }
+        .ws-btn.save { color: #fff; background: #07C160; }
+        .ws-btn.back { color: #576b95; background: transparent; border: 1px solid #f0f0f0; }
+
+        .wechat-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            background: #fff;
+            padding-bottom: 20px;
+        }
+        .wechat-item {
+            display: flex;
+            height: 72px;
+            padding: 10px 15px;
+            background: #fff;
+            align-items: center;
+            cursor: pointer;
+        }
+        .wechat-item:active { background: #f5f5f5; }
+        
+        .wechat-avatar {
+            width: 48px; height: 48px;
+            border-radius: 6px;
+            background: #ddd;
+            margin-right: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            color: #fff;
+            overflow: hidden;
+        }
+        .wechat-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .wechat-avatar.green { background: #07C160; }
+        .wechat-avatar.orange { background: #fa9d3b; }
+        .wechat-avatar.blue { background: #10aeff; }
+        
+        .wechat-content {
+            flex-grow: 1;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border-bottom: 1px solid #f0f0f0;
+            padding-right: 10px;
+            min-width: 0;
+        }
+        .wechat-item:last-child .wechat-content { border-bottom: none; }
+        
+        .wechat-row-1 { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        .wechat-name { font-size: 16px; font-weight: 500; color: #000; }
+        .wechat-time { font-size: 11px; color: #b2b2b2; }
+        
+        .wechat-row-2 { display: flex; }
+        .wechat-msg { font-size: 13px; color: #999; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* 发现页 & 我页 列表样式 */
+        .wechat-cell-group { margin-top: 10px; background: #fff; border-top: 1px solid #e5e5e5; border-bottom: 1px solid #e5e5e5; }
+        .wechat-cell {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            cursor: pointer;
+            position: relative;
+        }
+        .wechat-cell:active { background: #f5f5f5; }
+        .wechat-cell::after {
+            content: "";
+            position: absolute; bottom: 0; left: 60px; right: 0;
+            height: 1px; background: #e5e5e5;
+            transform: scaleY(0.5);
+        }
+        .wechat-cell:last-child::after { display: none; }
+        
+        .wechat-cell-icon { width: 24px; height: 24px; margin-right: 16px; }
+        .wechat-cell-text { flex-grow: 1; font-size: 17px; color: #000; }
+        .wechat-cell-arrow { width: 8px; height: 8px; border-top: 2px solid #b2b2b2; border-right: 2px solid #b2b2b2; transform: rotate(45deg); }
+
+        /* 底部导航 */
+        .wechat-tabbar {
+            height: 85px; /* 包含 Home Indicator 区域 */
+            background: #f7f7f7;
+            border-top: 1px solid #dcdcdc;
+            display: flex;
+            padding-bottom: 25px;
+            z-index: 50;
+        }
+        .wechat-tab {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            color: #000;
+        }
+        .wechat-tab.active .wechat-tab-icon { fill: #07C160; }
+        .wechat-tab.active .wechat-tab-label { color: #07C160; }
+        
+        .wechat-tab-icon { width: 26px; height: 26px; fill: #000; transition: fill 0.2s; }
+        .wechat-tab-label { font-size: 10px; font-weight: 500; transition: color 0.2s; }
+
+        /* ----- 聊天详情页 ----- */
+        .wechat-subpage {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: #ededed;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .wechat-subpage.active { transform: translateX(0); }
+
+        .chat-header {
+            height: 90px;
+            padding: 45px 15px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ededed;
+            border-bottom: 1px solid #dcdcdc;
+        }
+        .chat-back { font-size: 16px; cursor: pointer; padding: 5px; display: flex; align-items: center; }
+        .chat-back svg { width: 20px; height: 20px; fill: #000; margin-right: 5px; }
+        .chat-title { font-size: 17px; font-weight: 600; }
+        .chat-menu { width: 30px; display: flex; justify-content: flex-end; }
+        
+        .chat-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .chat-msg-row { display: flex; align-items: flex-start; gap: 10px; }
+        .chat-msg-row.self { flex-direction: row-reverse; }
+        
+        .chat-avatar { width: 40px; height: 40px; border-radius: 4px; background: #ddd; flex-shrink: 0; display:flex; justify-content:center; align-items:center; color:white; overflow:hidden;}
+        .chat-avatar img { width: 100%; height: 100%; }
+        
+        .chat-msg-content { display: flex; flex-direction: column; align-items: flex-start; max-width: 70%; }
+        .chat-msg-row.self .chat-msg-content { align-items: flex-end; }
+        
+        .chat-msg-name { font-size: 12px; color: #888; margin-bottom: 4px; margin-left: 2px; display: none; }
+        
+        .chat-bubble {
+            padding: 10px 12px;
+            border-radius: 4px;
+            font-size: 16px;
+            line-height: 1.4;
+            position: relative;
+        }
+        .chat-msg-row:not(.self) .chat-bubble {
+            background: #fff;
+            color: #000;
+        }
+        .chat-msg-row:not(.self) .chat-bubble::before {
+            content: "";
+            position: absolute; top: 14px; left: -6px;
+            width: 0; height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 6px solid #fff;
+        }
+        
+        .chat-msg-row.self .chat-bubble {
+            background: #95ec69;
+            color: #000;
+        }
+        .chat-msg-row.self .chat-bubble::before {
+            content: "";
+            position: absolute; top: 14px; right: -6px;
+            width: 0; height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-left: 6px solid #95ec69;
+        }
+
+        .chat-footer {
+            min-height: 60px;
+            background: #f7f7f7;
+            border-top: 1px solid #dcdcdc;
+            padding: 10px;
+            padding-bottom: 30px; /* 适配 Home Indicator */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .chat-input {
+            flex-grow: 1;
+            height: 36px;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 16px;
+            outline: none;
+            background: #fff;
+        }
+        .chat-btn { width: 28px; height: 28px; border: 1px solid #7f8389; border-radius: 50%; display: flex; justify-content: center; align-items: center;}
+        .chat-send-btn { color: #fff; background: #07C160; border: none; padding: 6px 12px; border-radius: 4px; font-size: 14px; cursor: pointer; }
+
+
+        /* ----- 新建/编辑备忘录弹窗 ----- */
+        #memo-create-modal {
+            position: absolute;
+            bottom: -100%;
+            left: 20px; right: 20px;
+            height: 90%;
+            background: white;
+            border-radius: 25px 25px 0 0;
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            transition: bottom 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.4s;
+            padding: 20px;
+        }
+        #memo-create-modal.active { bottom: 0; }
+        #memo-create-modal.expanded { height: 95%; }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-btn { font-size: 16px; color: #dcb0ba; font-weight: 600; cursor: pointer; }
+        
+        .memo-input-title {
+            font-size: 24px; font-weight: bold;
+            border: none; outline: none;
+            width: 100%; margin-bottom: 15px;
+            font-family: inherit;
+        }
+        .memo-input-content-wrapper {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .memo-input-content {
+            flex-grow: 1;
+            border: none; outline: none;
+            resize: none;
+            font-size: 16px; line-height: 1.5;
+            font-family: inherit; color: #333;
+        }
+        .expand-btn {
+            position: absolute;
+            bottom: 10px; right: 10px;
+            width: 30px; height: 30px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            color: #999;
+            cursor: pointer;
+        }
+
+        /* 菜单样式 */
+        #context-menu, #settings-menu {
+            position: absolute;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            padding: 5px;
+            display: none;
+            z-index: 300;
+            min-width: 160px;
+        }
+        #settings-menu {
+            top: 90px;
+            right: 20px;
+            transform-origin: top right;
+            animation: menuPop 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        @keyframes menuPop {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .menu-item {
+            padding: 12px 15px;
+            font-size: 14px;
+            color: #333;
+            border-bottom: 1px solid #eee;
+        }
+        .menu-item:last-child { border-bottom: none; }
+        .menu-item:active { background: #f5f5f5; border-radius: 8px; }
+        .menu-item.danger { color: #ff3b30; }
+
+        /* 弹窗提醒 */
+        .toast {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 14px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 500;
+        }
+        .toast.show { opacity: 1; }
+
+        /* iOS 风格弹窗 */
+        .ios-modal-mask {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            z-index: 3000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .ios-modal-mask.active { display: flex; opacity: 1; }
+
+        .ios-modal {
+            width: 270px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            transform: scale(1.1);
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        .ios-modal-mask.active .ios-modal { transform: scale(1); }
+
+        .ios-modal-content {
+            padding: 20px;
+        }
+        .ios-modal-title { font-size: 17px; font-weight: 600; margin-bottom: 5px; color: #000; }
+        .ios-modal-desc { font-size: 13px; color: #000; }
+
+        .ios-modal-actions {
+            border-top: 1px solid rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: row;
+        }
+        .ios-modal-btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 17px;
+            color: #007aff;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            border-right: 1px solid rgba(0,0,0,0.15);
+        }
+        .ios-modal-btn:last-child { border-right: none; }
+        .ios-modal-btn:active { background: rgba(0,0,0,0.05); }
+        .ios-modal-btn.bold { font-weight: 600; }
+
+        /* iOS 开关样式 */
+        .ios-switch {
+            position: relative;
+            width: 50px;
+            height: 30px;
+            appearance: none;
+            -webkit-appearance: none;
+            background: #e9e9ea;
+            outline: none;
+            border-radius: 15px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
+        .ios-switch:checked { background: #34c759; }
+        .ios-switch::after {
+            content: "";
+            position: absolute;
+            top: 2px; left: 2px;
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+        .ios-switch:checked::after { transform: translateX(20px); }
+
+        /* 置顶消息样式 */
+        .wechat-item.pinned { background-color: #f7f7f7; }
+
+        /* 记忆摘要条 */
+        #memory-bar {
+            position: absolute;
+            top: 90px; /* Header height */
+            left: 0; right: 0;
+            height: 32px;
+            background: rgba(247, 247, 247, 0.9);
+            backdrop-filter: blur(5px);
+            display: none; /* 有数据时显示 */
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: #576b95;
+            z-index: 90;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+        #memory-bar:hover { background: rgba(247, 247, 247, 1); }
+        
+        /* 记忆列表悬浮窗 */
+        #memory-list-panel {
+            position: absolute;
+            top: 122px; /* 90 + 32 */
+            right: 10px;
+            width: 260px;
+            max-height: 350px;
+            background: rgba(255,255,255,0.98);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            border-radius: 8px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            z-index: 95;
+            font-size: 12px;
+            color: #333;
             animation: fadeIn 0.2s ease;
         }
-        .menu-item {
-            padding: 12px 15px; display: flex; align-items: center; gap: 10px;
-            color: #444; font-size: 14px; border-radius: 10px;
-            cursor: pointer; transition: background 0.2s;
-        }
-        .menu-item:hover { background: #f5f5f5; }
+        #memory-list-panel.active { display: flex; }
         
-        .content-area {
-            flex: 1; padding: 10px 25px; overflow-y: auto;
-            display: flex; flex-direction: column; gap: 20px;
-            position: relative; z-index: 1;
-        }
-        .content-area::-webkit-scrollbar { width: 0px; }
-        
-        .bg-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background-size: cover; background-position: center;
-            opacity: 0.1; z-index: 0; pointer-events: none;
-            transition: opacity 0.3s;
-        }
-        
-        .add-card {
-            width: 100%; height: 180px; background: #f8f9fa;
-            border: 2px dashed #ddd; border-radius: 25px;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: all 0.3s; flex-shrink: 0;
-        }
-        .add-card:hover { background: #f0f0f0; border-color: #bbb; }
-        .add-card:active { transform: scale(0.98); }
-        .plus-circle {
-            width: 60px; height: 60px; border-radius: 50%; border: 2px solid #333;
-            display: flex; justify-content: center; align-items: center;
-            font-size: 30px; color: #333;
-        }
-        
-        .memo-card {
-            width: 100%; height: 180px;
-            background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);
-            border-radius: 25px; padding: 25px; color: white;
-            position: relative; box-shadow: 0 10px 20px rgba(255, 154, 158, 0.3);
-            display: flex; flex-direction: column; justify-content: space-between;
-            flex-shrink: 0; animation: fadeIn 0.4s ease;
-            user-select: none; -webkit-user-select: none;
-        }
-        .memo-top { display: flex; justify-content: space-between; align-items: flex-start; }
-        .memo-title { font-size: 18px; font-weight: 500; opacity: 0.9; }
-        .delete-btn {
-            background: rgba(255,255,255,0.2); border: none;
-            width: 30px; height: 30px; border-radius: 50%; color: white;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; transition: background 0.2s;
-        }
-        .delete-btn:hover { background: rgba(255,255,255,0.4); }
-        .memo-days { text-align: center; margin: 10px 0; }
-        .day-number { font-size: 48px; font-weight: 800; line-height: 1; }
-        .day-label { font-size: 14px; opacity: 0.8; margin-left: 5px; }
-        .memo-date {
-            font-size: 14px; opacity: 0.8; background: rgba(255,255,255,0.2);
-            padding: 5px 12px; border-radius: 12px; align-self: flex-start;
-        }
-        .pin-icon {
-            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-            background: rgba(255,255,255,0.3); padding: 4px 10px;
-            border-radius: 10px; font-size: 12px; display: flex;
-            align-items: center; gap: 4px; backdrop-filter: blur(4px);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ================== 通用弹窗 ================== */
-        .modal-overlay {
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.5); z-index: 100;
+        .memory-item {
+            padding: 8px 10px;
+            background: #fcfcfc;
+            border-radius: 6px;
+            border: 1px solid #eee;
+            border-left: 3px solid #07C160;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+        }
+        .memory-header { display: flex; justify-content: space-between; align-items: center; }
+        .memory-time { font-size: 10px; color: #999; }
+        .memory-actions { display: flex; gap: 8px; opacity: 0.6; }
+        .memory-action-btn { cursor: pointer; font-size: 14px; }
+        .memory-action-btn:hover { opacity: 1; transform: scale(1.1); }
+        
+        .memory-text { line-height: 1.4; white-space: pre-wrap; }
+        .memory-textarea {
+            width: 100%;
+            height: 80px;
+            padding: 5px;
+            border: 1px solid #07C160;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: inherit;
+            resize: vertical;
+            outline: none;
+            margin-bottom: 5px;
+        }
+        .memory-edit-footer { display: flex; justify-content: flex-end; gap: 8px; }
+        .memory-btn-sm {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            border: 1px solid #ccc;
+        }
+        .memory-btn-save { background: #07C160; color: white; border-color: #07C160; }
+
+        .memory-add-btn {
+            text-align: center;
+            padding: 8px;
+            background: #f0f9eb;
+            color: #07C160;
+            border: 1px dashed #07C160;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+        .memory-add-btn:active { background: #e1f3d8; }
+
+        /* 链接气泡样式 */
+        .chat-link-card {
+            width: 240px;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .link-card-title {
+            font-size: 16px;
+            color: #000;
+            margin: 10px 12px 6px;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .link-card-content {
+            display: flex;
+            padding: 0 12px 10px;
+            gap: 10px;
+        }
+        .link-card-desc {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+            flex-grow: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .link-card-thumb {
+            width: 50px;
+            height: 50px;
+            background: #eee;
+            flex-shrink: 0;
+            object-fit: cover;
+        }
+        .link-card-footer {
+            padding: 5px 12px;
+            font-size: 10px;
+            color: #aaa;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .chat-msg-row:not(.self) .chat-link-card { border: 1px solid #e5e5e5; }
+        .chat-msg-row.self .chat-link-card { border: 1px solid #89d961; }
+        
+        /* 链接读取/生成弹窗 */
+        #link-input-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 2500;
             display: none; justify-content: center; align-items: center;
-            backdrop-filter: blur(5px);
         }
-        .modal {
-            width: 80%; background: white; border-radius: 20px;
-            padding: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        #link-input-modal.active { display: flex; }
+        .link-modal-box {
+            width: 300px; background: #fff; border-radius: 12px; overflow: hidden;
+            display: flex; flex-direction: column; padding: 20px; gap: 15px;
         }
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .link-modal-title { font-size: 17px; font-weight: 600; text-align: center; }
+        .link-input-row { display: flex; flex-direction: column; gap: 5px; }
+        .link-label { font-size: 12px; color: #888; }
+        .link-input { 
+            padding: 8px; border: 1px solid #ddd; border-radius: 6px; 
+            font-size: 14px; outline: none; transition: border-color 0.2s;
+        }
+        .link-input:focus { border-color: #07C160; }
+        .link-btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .link-btn {
+            flex: 1; padding: 10px; border-radius: 6px; text-align: center; font-size: 15px; cursor: pointer;
+        }
+        .link-btn.cancel { background: #f0f0f0; color: #666; }
+        .link-btn.confirm { background: #07C160; color: white; }
+        .link-preview-loading {
+            font-size: 12px; color: #07C160; text-align: center; display: none;
+        }
+
+        /* 链接详情预览窗口 */
+        #link-preview-modal {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff; z-index: 2600;
+            display: none; flex-direction: column;
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+        #link-preview-modal.active { transform: translateY(0); display: flex; }
         
-        .modal h3 { margin-bottom: 20px; text-align: center; color: #333; }
-        .form-group { margin-bottom: 15px; }
-        .form-label { display: block; margin-bottom: 8px; font-size: 14px; color: #666; }
-        .form-input {
-            width: 100%; padding: 12px; border: 1px solid #ddd;
-            border-radius: 10px; font-size: 16px; outline: none;
-            transition: border-color 0.3s;
+        .lp-header {
+            height: 50px; border-bottom: 1px solid #eee; display: flex; align-items: center;
+            padding: 0 15px; flex-shrink: 0;
         }
-        .form-input:focus { border-color: #FF9A9E; }
+        .lp-close { font-size: 24px; color: #000; cursor: pointer; }
+        .lp-title { flex-grow: 1; text-align: center; font-weight: 600; font-size: 17px; margin: 0 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         
-        .type-selector { display: flex; gap: 10px; margin-bottom: 15px; }
-        .type-option {
-            flex: 1; padding: 10px; text-align: center;
-            border: 1px solid #ddd; border-radius: 10px;
-            cursor: pointer; font-size: 14px; color: #666; transition: all 0.2s;
-        }
-        .type-option.active { background: #FF9A9E; color: white; border-color: #FF9A9E; }
-        
-        .modal-actions { display: flex; gap: 10px; margin-top: 25px; }
-        .btn {
-            flex: 1; padding: 12px; border: none; border-radius: 12px;
-            font-size: 16px; font-weight: 600; cursor: pointer;
-        }
-        .btn-cancel { background: #f0f0f0; color: #666; }
-        .btn-confirm { background: #FF9A9E; color: white; }
-        
-        .file-upload-label {
-            display: block; padding: 10px; border: 2px dashed #ddd;
-            border-radius: 10px; text-align: center; color: #888;
-            cursor: pointer; font-size: 14px;
-        }
-        .file-upload-label:hover { border-color: #FF9A9E; background: #fff8f8; }
-        
-        .world-book-combo { position: relative; display: flex; justify-content: center; align-items: center; }
+        .lp-content { flex-grow: 1; overflow-y: auto; padding: 20px; }
+        .lp-article-title { font-size: 22px; font-weight: bold; margin-bottom: 10px; line-height: 1.4; }
+        .lp-meta { font-size: 13px; color: #999; margin-bottom: 20px; }
+        .lp-text { font-size: 16px; line-height: 1.6; color: #333; }
+        .lp-img { width: 100%; border-radius: 8px; margin: 15px 0; }
+
     </style>
 </head>
 <body>
 
-    <!-- ================== 主页 (Page 1) ================== -->
-    <div id="page-home" class="page-view">
-        <div class="iphone-container home-style">
-            <!-- 状态栏 -->
-            <div class="status-bar">
-                <span>9:41</span>
-                <span>
-                    <i class="fas fa-signal"></i>&nbsp;
-                    <i class="fas fa-wifi"></i>&nbsp;
-                    <i class="fas fa-battery-full"></i>
-                </span>
-            </div>
+    <div class="phone-screen" id="phoneScreen">
+        
+        <!-- 全局 Home Indicator (点击返回桌面) -->
+        <div class="home-indicator-area" onclick="showDesktop()">
+            <div class="home-indicator"></div>
+        </div>
 
-            <!-- 顶部区域 -->
-            <div class="top-section">
-                <div class="header-card">
-                    <div class="avatar" onclick="openAvatarModal()"></div>
-                    <input type="text" class="input-box" placeholder="请输入内容...">
+        <!-- 桌面层 -->
+        <div id="desktop">
+            <!-- 顶部毛玻璃卡片 -->
+            <div class="glass-card">
+                <div class="avatar-wrapper" onclick="document.getElementById('avatarInput').click()">
+                    <div class="avatar-circle" id="avatarPreview">
+                        <span>头像</span>
+                    </div>
+                    <input type="file" id="avatarInput" accept="image/*" style="display:none" onchange="previewAvatar(this)">
+                </div>
+                <div class="input-group">
+                    <input type="text" class="custom-input" placeholder="输入内容...">
+                    <input type="text" class="custom-input" placeholder="输入内容...">
+                    <input type="text" class="custom-input" placeholder="输入内容...">
                 </div>
             </div>
 
-            <!-- 主内容区 -->
-            <div class="main-content">
-                <div class="left-panel">
-                    <!-- 跳转到纪念日页 -->
-                    <a href="#" onclick="switchToMemo(); return false;" class="memorial-link">
-                        <img id="homeMemorialImg" src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="恋爱纪念" class="memorial-img">
-                        <div class="memorial-info-overlay" id="homeMemorialInfo" style="display: none;">
-                            <div class="memorial-title" id="pinnedTitle">纪念日</div>
-                            <div class="memorial-days" id="pinnedDays">0<small>天</small></div>
+            <!-- 中部区域 -->
+            <div class="middle-section">
+                <!-- 备忘录小组件 -->
+                <div class="widget-memo" id="desktopWidget" onclick="openMemoApp()">
+                    <div class="widget-memo-content-layer">
+                        <div class="widget-memo-title">📝 备忘录</div>
+                    </div>
+                </div>
+
+                <!-- App 网格 -->
+                <div class="app-grid-2x2">
+                    <div class="app-item" onclick="openWeChatApp()">
+                        <div class="app-icon icon-wechat">
+                            <div class="badge">12</div>
+                            <svg viewBox="0 0 24 24"><path d="M17.5,10c0-2.5-2.2-4.5-5-4.5c-2.8,0-5,2-5,4.5c0,2.5,2.2,4.5,5,4.5c0.6,0,1.2-0.1,1.7-0.3 l3.2,1.7l-0.8-2.6C17.2,12.5,17.5,11.3,17.5,10z"/><path d="M7.7,14c-0.3,0-0.7,0-1,0.1L4.3,13l0.5,1.7C3.5,15.6,2.7,16.7,2.7,18c0,2.1,2.1,3.8,4.7,3.8 c0.5,0,1-0.1,1.5-0.2l2.3,1.2l-0.6-1.9c1-0.7,1.6-1.7,1.6-2.9C12.2,15.9,10.2,14,7.7,14z"/></svg>
                         </div>
-                    </a>
-                </div>
-
-                <div class="right-panel">
-                    <div class="app-item">
-                        <div class="app-icon icon-wechat"><i class="fab fa-weixin"></i></div>
                         <span class="app-name">微信</span>
                     </div>
                     <div class="app-item">
-                        <div class="app-icon icon-world"><div class="world-book-combo"><i class="fas fa-earth-asia"></i></div></div>
+                        <div class="app-icon icon-worldbook">
+                            <svg viewBox="0 0 24 24"><path d="M18,2H6C4.9,2,4,2.9,4,4v16c0,1.1,0.9,2,2,2h12c1.1,0,2-0.9,2-2V4C20,2.9,19.1,2,18,2z M12,18 c-2.2,0-4-1.8-4-4s1.8-4,4-4s4,1.8,4,4S14.2,18,12,18z"/><rect x="6" y="4" width="12" height="2" fill="rgba(255,255,255,0.5)"/></svg>
+                        </div>
                         <span class="app-name">世界书</span>
                     </div>
-                    <div class="app-item">
-                        <div class="app-icon icon-settings"><i class="fas fa-gear"></i></div>
-                        <span class="app-name">设置</span>
-                    </div>
-                    <div class="app-item">
-                        <div class="app-icon icon-beautify"><i class="fas fa-palette"></i></div>
-                        <span class="app-name">美化</span>
-                    </div>
+                    <div class="app-item"><div class="app-icon icon-placeholder empty"></div><span class="app-name"></span></div>
+                    <div class="app-item"><div class="app-icon icon-placeholder empty"></div><span class="app-name"></span></div>
                 </div>
             </div>
 
-            <!-- Dock栏 -->
-            <div class="dock-container">
-                <div class="dock">
-                    <div class="dock-item icon-phone" title="手机"><i class="fas fa-mobile-screen-button"></i></div>
-                    <div class="dock-item icon-novel" title="小说"><i class="fas fa-book-open"></i></div>
-                    <div class="dock-item icon-forum" title="论坛"><i class="fas fa-comments"></i></div>
+            <!-- Dock 栏 -->
+            <div class="dock-bar">
+                <div class="app-item" onclick="openSettingsApp()">
+                    <div class="app-icon icon-settings-app">
+                        <svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.49-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg>
+                    </div>
+                    <span class="app-name">设置</span>
+                </div>
+                <div class="app-item">
+                    <div class="app-icon icon-themes">
+                        <svg viewBox="0 0 24 24"><path d="M12,3c-4.97,0-9,4.03-9,9s4.03,9,9,9c0.83,0,1.5-0.67,1.5-1.5c0-0.39-0.15-0.74-0.39-1.01c-0.23-0.26-0.38-0.61-0.38-0.99 c0-0.83,0.67-1.5,1.5-1.5H16c2.76,0,5-2.24,5-5C21,6.58,16.97,3,12,3z M6.5,12c-0.83,0-1.5-0.67-1.5-1.5S5.67,9,6.5,9 S8,9.67,8,10.5S7.33,12,6.5,12z M9.5,8C8.67,8,8,7.33,8,6.5S8.67,5,9.5,5S11,5.67,11,6.5S10.33,8,9.5,8z M14.5,8 c-0.83,0-1.5-0.67-1.5-1.5S13.67,5,14.5,5S16,5.67,16,6.5S15.33,8,14.5,8z M17.5,12c-0.83,0-1.5-0.67-1.5-1.5S16.67,9,17.5,9 S19,9.67,19,10.5S18.33,12,17.5,12z"/></svg>
+                    </div>
+                    <span class="app-name">主题</span>
+                </div>
+                <div class="app-item"><div class="app-icon icon-placeholder empty"></div><span class="app-name"></span></div>
+            </div>
+        </div>
+
+        <!-- 备忘录 App -->
+        <div id="memo-app" class="app-container">
+            <div class="app-header">
+                <div class="header-btn" onclick="showDesktop()">❮ 返回</div>
+                <div class="header-title">备忘录</div>
+                <div class="header-btn" onclick="openMemoSettings(event)">
+                    <svg style="width:24px;height:24px;fill:#dcb0ba;" viewBox="0 0 24 24">
+                        <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.21,8.95 2.27,9.22 2.46,9.37L4.57,11C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.21,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.67 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z" />
+                    </svg>
                 </div>
             </div>
-            
-            <!-- 头像弹窗 -->
-            <div class="modal-overlay" id="avatarModalOverlay">
-                <div class="modal">
-                    <h3>设置头像</h3>
-                    <div class="form-group">
-                        <label class="form-label">图片链接</label>
-                        <input type="text" class="form-input" id="avatarUrlInput" placeholder="https://...">
+            <div class="memo-list" id="memoList"></div>
+            <div class="app-footer" id="appFooter">
+                <div class="create-memo-btn" onclick="openMemoModal()">
+                    <svg viewBox="0 0 24 24" style="width:24px;height:24px;fill:white;margin-right:5px;"><path d="M3,17.25V21H6.75L17.81,9.94L14.06,6.19L3,17.25M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.13,5.12L18.88,8.87L20.71,7.04Z"/></svg>
+                </div>
+                <div class="selection-footer">
+                    <div onclick="selectAllMemos()">全选</div>
+                    <div style="color: #ff3b30;" onclick="deleteSelectedMemos()">删除</div>
+                    <div onclick="exitSelectionMode()">取消</div>
+                </div>
+            </div>
+            <!-- 设置菜单 -->
+            <div id="settings-menu">
+                <div class="menu-item" onclick="handleSettingsAction('bg')">更换桌面照片</div>
+                <div class="menu-item" onclick="handleSettingsAction('manage')">选择备忘录</div>
+            </div>
+        </div>
+
+        <!-- 设置 App -->
+        <div id="settings-app" class="app-container">
+            <div class="app-header">
+                <div class="header-btn" onclick="showDesktop()">❮ 返回</div>
+                <div class="header-title">设置</div>
+                <div class="header-btn" style="color: #007aff; font-weight: 600;" onclick="saveApiSettings()">保存</div>
+            </div>
+            <div style="flex-grow: 1; overflow-y: auto; padding-top: 10px;">
+                <div style="padding-left: 20px; margin-bottom: 5px; font-size: 13px; color: #6d6d72; text-transform: uppercase;">AI 接口连接</div>
+                <div class="settings-group" style="margin-top: 0;">
+                    <div class="settings-row">
+                        <div class="settings-label">接口地址</div>
+                        <input type="text" id="apiEndpoint" class="settings-input" placeholder="https://api.openai.com/v1">
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">或 上传本地图片</label>
-                        <label for="localAvatarInput" class="file-upload-label">
-                            <i class="fas fa-cloud-upload-alt"></i> 点击选择文件
-                        </label>
-                        <input type="file" id="localAvatarInput" accept="image/*" style="display:none;" onchange="handleAvatarFile(this)">
+                    <div class="settings-row">
+                        <div class="settings-label">API Key</div>
+                        <input type="password" id="apiKey" class="settings-input" placeholder="sk-...">
                     </div>
-                    <div class="modal-actions">
-                        <button class="btn btn-cancel" onclick="closeAvatarModal()">取消</button>
-                        <button class="btn btn-confirm" onclick="saveAvatar()">确定</button>
+                    <div class="settings-row">
+                        <div class="settings-label">模型名称</div>
+                        <input type="text" id="apiModel" class="settings-input" placeholder="gpt-3.5-turbo">
                     </div>
+                    <div class="settings-row" onclick="fetchModelList()" style="cursor: pointer; justify-content: center;">
+                        <span style="color: #007aff; font-size: 15px;">从服务器拉取模型列表</span>
+                    </div>
+                </div>
+                <div style="padding: 10px 20px; font-size: 13px; color: #8e8e93;">
+                    设置兼容 OpenAI 格式的接口信息。保存后，聊天回复将尝试通过该接口请求。
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- ================== 纪念日页 (Page 2) ================== -->
-    <div id="page-memo" class="page-view" style="display: none;">
-        <div class="iphone-container memo-style">
-            <!-- 背景层 -->
-            <div class="bg-overlay" id="bgOverlay"></div>
-
-            <!-- 头部 -->
-            <div class="header">
-                <!-- 返回主页 -->
-                <button class="nav-btn" onclick="switchToHome()">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <div class="page-title">
-                    <span>纪念日</span>
+        <!-- 微信 App -->
+        <div id="wechat-app" class="app-container">
+            <div class="wechat-pages">
+                <!-- 微信 Tab (首页) -->
+                <div id="tab-chat" class="wechat-page active">
+                    <div class="wechat-header">
+                        <div class="wechat-back-btn" onclick="showDesktop()">❮</div>
+                        <div class="wechat-title">微信(12)</div>
+                        <div class="wechat-header-icons">
+                            <svg class="wechat-icon" viewBox="0 0 24 24"><path d="M15.5,14h-0.79l-0.28-0.27C15.41,12.59,16,11.11,16,9.5C16,5.91,13.09,3,9.5,3S3,5.91,3,9.5S5.91,16,9.5,16c1.61,0,3.09-0.59,4.23-1.57l0.27,0.28v0.79l5,4.99L20.49,19L15.5,14z M9.5,14C7.01,14,5,11.99,5,9.5S7.01,5,9.5,5S14,7.01,14,9.5S11.99,14,9.5,14z"/></svg>
+                            <div onclick="toggleWeChatMenu(event)" style="display:flex;">
+                                <svg class="wechat-icon" viewBox="0 0 24 24"><path d="M19,13h-6v6h-2v-6H5v-2h6V5h2v6h6V13z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wechat-list" id="wechat-chat-list">
+                        <!-- 动态渲染 -->
+                    </div>
                 </div>
-                <button class="nav-btn" onclick="toggleMenu()">
-                    <i class="fas fa-ellipsis"></i>
-                </button>
+
+                <!-- 通讯录 Tab -->
+                <div id="tab-contact" class="wechat-page">
+                    <div class="wechat-header">
+                        <div class="wechat-back-btn" onclick="showDesktop()">❮</div>
+                        <div class="wechat-title">通讯录</div>
+                        <div class="wechat-header-icons"><svg class="wechat-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg></div>
+                    </div>
+                    <div class="wechat-list">
+                        <!-- 好友列表 -->
+                        <div style="padding:10px 15px; color:#888; font-size:14px; background:#ededed;">好友</div>
+                        <div class="wechat-cell-group" id="contact-list-friends" style="margin-top:0;">
+                            <!-- 动态渲染好友 -->
+                        </div>
+
+                        <!-- 群聊列表 -->
+                        <div style="padding:10px 15px; color:#888; font-size:14px; background:#ededed;">群聊</div>
+                        <div class="wechat-cell-group" id="contact-list-groups" style="margin-top:0;">
+                            <!-- 动态渲染群聊 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 发现 Tab -->
+                <div id="tab-discover" class="wechat-page">
+                    <div class="wechat-header">
+                        <div class="wechat-back-btn" onclick="showDesktop()">❮</div>
+                        <div class="wechat-title">发现</div>
+                    </div>
+                    <div class="wechat-list">
+                        <div class="wechat-cell-group">
+                            <div class="wechat-cell">
+                                <img src="https://api.iconify.design/mdi:camera-iris.svg" class="wechat-cell-icon">
+                                <div class="wechat-cell-text">朋友圈</div>
+                                <div class="wechat-cell-arrow"></div>
+                            </div>
+                        </div>
+                        <div class="wechat-cell-group">
+                            <div class="wechat-cell">
+                                <img src="https://api.iconify.design/mdi:shopping-outline.svg" class="wechat-cell-icon">
+                                <div class="wechat-cell-text">购物</div>
+                                <div class="wechat-cell-arrow"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 我 Tab -->
+                <div id="tab-me" class="wechat-page">
+                    <div style="background:#fff; padding-top:45px;">
+                        <div class="wechat-header" style="background:#fff; border:none; height:45px; padding:0 15px;">
+                             <div class="wechat-back-btn" onclick="showDesktop()">❮</div>
+                        </div>
+                    </div>
+                    <div style="padding: 10px 20px 30px; background:#fff; display:flex; gap:20px; align-items:center; margin-bottom:10px;">
+                        <div style="width:64px; height:64px; border-radius:8px; background:#eee; overflow:hidden;">
+                            <!-- 头像占位 -->
+                            <div style="width:100%;height:100%;background:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23ddd%22/><text x=%2250%22 y=%2250%22 font-size=%2240%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23fff%22>我</text></svg>') center/cover"></div>
+                        </div>
+                        <div>
+                            <div style="font-size:20px; font-weight:bold; margin-bottom:5px;">小霁</div>
+                            <div style="font-size:14px; color:#888;">微信号：xiaoji_phone</div>
+                        </div>
+                        <div style="margin-left:auto;"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M4 15h16v-2H4v2zm0 4h16v-2H4v2zm0-8h16V9H4v2zm0-6v2h16V5H4z" fill="#ccc"/></svg></div>
+                    </div>
+                    
+                    <div class="wechat-cell-group">
+                        <div class="wechat-cell">
+                            <img src="https://api.iconify.design/mdi:cube-outline.svg" class="wechat-cell-icon">
+                            <div class="wechat-cell-text">服务</div>
+                            <div class="wechat-cell-arrow"></div>
+                        </div>
+                    </div>
+                    <div class="wechat-cell-group">
+                        <div class="wechat-cell">
+                            <img src="https://api.iconify.design/mdi:sticker-emoji.svg" class="wechat-cell-icon">
+                            <div class="wechat-cell-text">表情</div>
+                            <div class="wechat-cell-arrow"></div>
+                        </div>
+                    </div>
+                    <div class="wechat-cell-group">
+                        <div class="wechat-cell">
+                            <img src="https://api.iconify.design/mdi:cog-outline.svg" class="wechat-cell-icon">
+                            <div class="wechat-cell-text">设置</div>
+                            <div class="wechat-cell-arrow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 聊天详情页 (覆盖在 Tab 页之上) -->
+            <div id="wechat-chat-detail" class="wechat-subpage">
+                <div class="chat-header">
+                    <div class="chat-back" onclick="closeChatDetail()">
+                        <svg viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+                        微信(12)
+                    </div>
+                    <div class="chat-title" id="chatTitle">用户</div>
+                    <div class="chat-menu" onclick="openChatSettings()">...</div>
+                </div>
+                <!-- 记忆摘要条 -->
+                <div id="memory-bar" onclick="toggleMemoryPanel()">
+                    <span>✨ 存在 0 条记忆摘要，点击查看</span>
+                </div>
+                <!-- 记忆列表面板 -->
+                <div id="memory-list-panel">
+                    <!-- 动态生成 -->
+                </div>
+
+                <div class="chat-body" id="chatBody">
+                    <!-- 动态生成消息 -->
+                </div>
+                <div class="chat-footer">
+                    <!-- 重新回复 -->
+                    <div class="chat-btn" onclick="triggerAIResponse(true)" title="让AI重新回复">
+                        <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#555"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-0.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14 0.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+                    </div>
+                    <input type="text" class="chat-input" id="chatInput" placeholder="">
+                    <!-- 触发回复 -->
+                    <div class="chat-btn" onclick="triggerAIResponse(false)" title="让AI回复">
+                        <svg viewBox="0 0 24 24" style="width:18px;height:18px;fill:#555"><path d="M20,2H4C2.9,2 2,2.9 2,4V22L6,18H20C21.1,18 22,17.1 22,16V4C22,2.9 21.1,2 20,2M20,16H5.17L4,17.17V4H20V16Z" /></svg>
+                    </div>
+                    <button class="chat-send-btn" onclick="sendChatMessage()">发送</button>
+                </div>
+            </div>
+
+            <div class="wechat-tabbar">
+                <div class="wechat-tab active" onclick="switchWeChatTab(0)">
+                    <svg class="wechat-tab-icon" viewBox="0 0 24 24"><path d="M21.58,16.09l-1.09-3.29C20.45,12.65,20.4,12.32,20.35,12c0-3.31-3.13-6-7-6c-3.87,0-7,2.69-7,6c0,3.31,3.13,6,7,6 c0.73,0,1.43-0.09,2.11-0.27l3.86,2.05C19.7,19.98,20.17,19.77,20.32,19.26C20.39,19.03,20.38,18.78,20.28,18.56L21.58,16.09z M6,12 c0-4.42,4.03-8,9-8c4.97,0,9,3.58,9,8c0,1.48-0.45,2.87-1.25,4.08l1.45,2.75C24.46,19.34,24.47,20,24.22,20.59 c-0.49,1.14-1.8,1.67-2.94,1.18l-3.32-1.76C16.89,20.67,15.47,21,14,21C8.48,21,4,16.97,4,12H6z M4.93,12.59l-2.02,2.02 C2.74,14.78,2.78,15.05,3,15.19l1.79,1.16c-0.23,0.59-0.38,1.21-0.42,1.86l-2.11,0.43c-0.24,0.05-0.41,0.26-0.41,0.51V20.8 c0,0.28,0.22,0.5,0.5,0.5h1.66c0.05,0.65,0.21,1.27,0.46,1.85L2.69,24.31c-0.12,0.22-0.07,0.49-0.12,0.61l1.44,0.83 c0.22,0.12,0.49,0.07,0.61-0.12l1.04-1.8c0.59,0.23,1.21,0.38,1.86,0.42l0.43,2.11c0.05,0.24,0.26,0.41,0.51,0.41h1.66 c0.28,0,0.5-0.22,0.5-0.5v-1.66c0.65-0.05,1.27-0.21,1.85-0.46l1.16,1.79c0.14,0.22,0.41,0.26,0.61,0.12l1.44-0.83 c0.22-0.12,0.26-0.39,0.12-0.61l-1.04-1.8c0.23-0.59,0.38-1.21,0.42-1.86l2.11-0.43c0.24-0.05,0.41-0.26,0.41-0.51v-1.66 c0-0.28-0.22-0.5-0.5-0.5h-1.66c-0.05-0.65-0.21-1.27-0.46-1.85l1.79-1.16c0.22-0.14,0.26-0.41,0.12-0.61l-0.83-1.44 c-0.12-0.22-0.39-0.26-0.61-0.12l-1.8,1.04C15.86,13.23,15.24,13.08,14.59,13.04z"/></svg>
+                    <span class="wechat-tab-label">微信</span>
+                </div>
+                <div class="wechat-tab" onclick="switchWeChatTab(1)">
+                    <svg class="wechat-tab-icon" viewBox="0 0 24 24"><path d="M4,18v-0.65c0-1.78,3.58-2.67,5.33-2.67s5.33,0.89,5.33,2.67V18H4z M9.33,12.67c-1.47,0-2.67-1.19-2.67-2.67 s1.19-2.67,2.67-2.67s2.67,1.19,2.67,2.67S10.8,12.67,9.33,12.67z M18.67,15.78c-0.22-0.12-0.48-0.07-0.61,0.12 c-0.35,0.61-0.97,1.03-1.72,1.1c0.63-0.87,1-1.92,1-3.04v-0.65c0-0.29-0.09-0.56-0.24-0.8c0.82-0.68,1.35-1.69,1.35-2.84 c0-1.74-1.2-3.2-2.82-3.64c0.01-0.12,0.02-0.23,0.02-0.35c0-2.58-2.09-4.67-4.67-4.67S6.33,3.09,6.33,5.67c0,0.12,0.01,0.23,0.02,0.35 C4.73,6.47,3.53,7.93,3.53,9.67c0,1.15,0.53,2.16,1.35,2.84c-0.15,0.23-0.24,0.51-0.24,0.8v0.65c0,1.12,0.37,2.16,1,3.04 c-0.75-0.07-1.37-0.49-1.72-1.1c-0.12-0.22-0.39-0.26-0.61-0.12l-1.44,0.83C1.65,16.73,1.6,17,1.72,17.22l2.67,4.62 C4.58,22.17,4.92,22.33,5.25,22.33c0.16,0,0.31-0.04,0.46-0.12l1.62-0.93c1.23,0.47,2.57,0.72,3.97,0.72h0.07 c1.4-0.01,2.74-0.26,3.96-0.73l1.62,0.93c0.14,0.08,0.3,0.12,0.46,0.12c0.34,0,0.67-0.16,0.86-0.48l2.67-4.62 c0.12-0.22,0.07-0.49-0.12-0.61L18.67,15.78z"/></svg>
+                    <span class="wechat-tab-label">通讯录</span>
+                </div>
+                <div class="wechat-tab" onclick="switchWeChatTab(2)">
+                    <svg class="wechat-tab-icon" viewBox="0 0 24 24"><path d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M12,17.93c-3.27,0-5.93-2.66-5.93-5.93 S8.73,6.07,12,6.07s5.93,2.66,5.93,5.93S15.27,17.93,12,17.93z M14.19,13.34l-3.32-1.76l-0.68,1.29l3.32,1.76 C13.72,14.74,13.97,14.53,14.19,13.34z M10.6,10.15l1.52-2.87l-1.32-0.7L9.28,9.45C9.76,9.59,10.21,9.83,10.6,10.15z"/></svg>
+                    <span class="wechat-tab-label">发现</span>
+                </div>
+                <div class="wechat-tab" onclick="switchWeChatTab(3)">
+                    <svg class="wechat-tab-icon" viewBox="0 0 24 24"><path d="M12,12c2.21,0,4-1.79,4-4s-1.79-4-4-4S8,5.79,8,8S9.79,12,12,12z M12,14c-2.67,0-8,1.34-8,4v2h16v-2C20,15.34,14.67,14,12,14z"/></svg>
+                    <span class="wechat-tab-label">我</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 新建/编辑备忘录弹窗 -->
+        <div id="memo-create-modal">
+            <div class="modal-header">
+                <div class="modal-btn" style="color: #666;" onclick="tryCloseCreateModal()">关闭</div>
+                <div class="modal-btn" onclick="saveMemo()">完成</div>
+            </div>
+            <input type="text" class="memo-input-title" id="newMemoTitle" placeholder="标题">
+            <div class="memo-input-content-wrapper">
+                <textarea class="memo-input-content" id="newMemoContent" placeholder="内容..."></textarea>
+                <div class="expand-btn" onclick="toggleExpandModal()">
+                    <svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#666;"><path d="M12,18.17L8.83,15L7.42,16.41L12,21L16.59,16.41L15.17,15M12,5.83L15.17,9L16.58,7.59L12,3L7.41,7.59L8.83,9L12,5.83Z"/></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- 长按菜单 -->
+        <div id="context-menu">
+            <div class="menu-item" onclick="handleMenuAction('pin')">置顶</div>
+            <div class="menu-item danger" onclick="handleMenuAction('delete')">删除</div>
+        </div>
+
+        <!-- 微信右上角菜单 -->
+        <div id="wechat-plus-menu">
+            <div class="wechat-menu-item" onclick="showGroupCreateModal()">
+                <svg class="wechat-menu-icon" viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM4 18v-3h2v3H4zm14 0h-9v-2h9v2zm0-4h-9v-2h9v2zm0-4H6V8h12v2z"/></svg>
+                发起群聊
+            </div>
+            <div class="wechat-menu-item" onclick="showWeChatInputModal()">
+                <svg class="wechat-menu-icon" viewBox="0 0 24 24"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                添加朋友
+            </div>
+            <div class="wechat-menu-item" onclick="showWeChatInputModal()">
+                <svg class="wechat-menu-icon" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4V8l8 5 8-5v10zm-8-7L4 6h16l-8 5z"/></svg>
+                创建新聊天
+            </div>
+            <div class="wechat-menu-item" onclick="showLinkInputModal()">
+                <svg class="wechat-menu-icon" viewBox="0 0 24 24"><path d="M3.9,12c0-1.71,1.39-3.1,3.1-3.1h4V7H7c-2.76,0-5,2.24-5,5s2.24,5,5,5h4v-1.9H7C5.29,15.1,3.9,13.71,3.9,12z M8,13h8v-2H8V13z M17,7h-4v1.9h4c1.71,0,3.1,1.39,3.1,3.1s-1.39,3.1-3.1,3.1h-4V17h4c2.76,0,5-2.24,5-5S20.76,7,17,7z"/></svg>
+                发送链接卡片
+            </div>
+        </div>
+
+        <!-- 链接输入/预览模块 -->
+        <div id="link-input-modal">
+            <div class="link-modal-box">
+                <div class="link-modal-title">发送链接</div>
                 
-                <div class="dropdown-menu" id="dropdownMenu">
-                    <div class="menu-item" onclick="openCoverModal()">
-                        <i class="fas fa-image"></i> 更改封面
-                    </div>
+                <div class="link-input-row">
+                    <span class="link-label">链接 URL</span>
+                    <input type="text" class="link-input" id="linkUrl" placeholder="https://..." onblur="simulateLinkPreview()">
                 </div>
-            </div>
+                
+                <div class="link-preview-loading" id="linkLoading">正在读取链接内容...</div>
 
-            <!-- 内容区域 -->
-            <div class="content-area" id="listContainer">
-                <div class="add-card" onclick="openModal()">
-                    <div class="plus-circle"><i class="fas fa-plus"></i></div>
+                <div class="link-input-row">
+                    <span class="link-label">标题</span>
+                    <input type="text" class="link-input" id="linkTitle" placeholder="输入标题">
                 </div>
-            </div>
+                
+                <div class="link-input-row">
+                    <span class="link-label">摘要</span>
+                    <input type="text" class="link-input" id="linkDesc" placeholder="输入摘要描述">
+                </div>
 
-            <!-- 添加纪念日弹窗 -->
-            <div class="modal-overlay" id="modalOverlay">
-                <div class="modal">
-                    <h3>新建纪念日</h3>
-                    <div class="form-group">
-                        <label class="form-label">类型</label>
-                        <div class="type-selector">
-                            <div class="type-option active" onclick="selectType('past', this)">正数日</div>
-                            <div class="type-option" onclick="selectType('future', this)">倒数日</div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">名称</label>
-                        <input type="text" class="form-input" id="titleInput" placeholder="例如：在一起">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">日期</label>
-                        <input type="date" class="form-input" id="dateInput">
-                    </div>
-                    <div class="modal-actions">
-                        <button class="btn btn-cancel" onclick="closeModal()">取消</button>
-                        <button class="btn btn-confirm" onclick="saveMemorial()">确定</button>
-                    </div>
+                <div class="link-input-row">
+                    <span class="link-label">封面图 URL (可选)</span>
+                    <input type="text" class="link-input" id="linkImg" placeholder="图片地址">
                 </div>
-            </div>
 
-            <!-- 更改封面弹窗 -->
-            <div class="modal-overlay" id="coverModalOverlay">
-                <div class="modal">
-                    <h3>更改背景封面</h3>
-                    <div class="form-group">
-                        <label class="form-label">网络图片链接</label>
-                        <input type="text" class="form-input" id="coverInput" placeholder="https://...">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">或 上传本地图片</label>
-                        <label for="localCoverInput" class="file-upload-label">
-                            <i class="fas fa-cloud-upload-alt"></i> 点击选择文件
-                        </label>
-                        <input type="file" id="localCoverInput" accept="image/*" style="display:none;" onchange="handleFileUpload(this)">
-                    </div>
-                    <div class="form-group">
-                        <div style="font-size:12px; color:#999; margin-bottom:5px;">快速预设：</div>
-                        <div style="display:flex; gap:10px;">
-                            <div style="width:40px; height:40px; background:#FF9A9E; border-radius:8px; cursor:pointer;" onclick="setQuickCover('linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)')"></div>
-                            <div style="width:40px; height:40px; background:#a18cd1; border-radius:8px; cursor:pointer;" onclick="setQuickCover('linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)')"></div>
-                            <div style="width:40px; height:40px; background-image:url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=100'); background-size:cover; border-radius:8px; cursor:pointer;" onclick="setQuickCover('url(https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=600)')"></div>
-                        </div>
-                    </div>
-                    <div class="modal-actions">
-                        <button class="btn btn-cancel" onclick="closeCoverModal()">取消</button>
-                        <button class="btn btn-confirm" onclick="saveCover()">确定</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 置顶选择弹窗 (长按触发) -->
-            <div class="modal-overlay" id="pinModalOverlay">
-                <div class="modal" style="width: 70%;">
-                    <h3>管理卡片</h3>
-                    <p style="text-align: center; margin-bottom: 20px; color: #666;">您想对这个纪念日做什么？</p>
-                    <div class="modal-actions" style="flex-direction: column; gap: 10px;">
-                        <button class="btn btn-confirm" onclick="pinCurrent()">置顶</button>
-                        <button class="btn btn-cancel" style="background: #ffecb3; color: #666;" onclick="unpinCurrent()">取消置顶</button>
-                        <button class="btn btn-cancel" onclick="closePinModal()">取消</button>
-                    </div>
+                <div class="link-btn-group">
+                    <div class="link-btn cancel" onclick="closeLinkInputModal()">取消</div>
+                    <div class="link-btn confirm" onclick="sendLinkMessage()">发送</div>
                 </div>
             </div>
         </div>
+
+        <!-- 链接详情预览窗口 -->
+        <div id="link-preview-modal">
+            <div class="lp-header">
+                <div class="lp-close" onclick="closeLinkPreview()">×</div>
+                <div class="lp-title" id="lpHeaderTitle">网页浏览</div>
+                <div style="width:24px;"></div>
+            </div>
+            <div class="lp-content" id="lpContent">
+                <!-- 动态填充 -->
+            </div>
+        </div>
+
+        <!-- 微信输入弹窗 -->
+        <div id="wechat-input-modal-mask">
+            <div class="wechat-input-box">
+                <div class="wechat-input-header">创建新聊天</div>
+                <div class="wechat-input-body">
+                    <input type="text" class="wechat-name-input" id="wechatNewName" placeholder="输入名字">
+                </div>
+                <div class="wechat-input-footer">
+                    <div class="wechat-input-btn cancel" onclick="closeWeChatInputModal()">取消</div>
+                    <div class="wechat-input-btn" onclick="confirmWeChatAdd()">确定</div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 发起群聊选择页面 -->
+        <div id="wechat-group-create-modal" class="wechat-subpage" style="z-index: 1500; background: #ededed;">
+            <div class="wechat-header">
+                <div class="wechat-back-btn" onclick="closeGroupCreateModal()" style="font-weight:400; font-size:16px;">取消</div>
+                <div class="wechat-title">发起群聊</div>
+                <div class="wechat-input-btn" style="width:auto; border:none; color:#ddd; font-weight:600; padding:0;" id="btnCreateGroup" onclick="createGroupChat()">完成</div>
+            </div>
+            <div class="wechat-list" id="group-contact-list" style="padding-top:10px;">
+                <!-- 动态渲染好友列表 -->
+            </div>
+        </div>
+
+        <!-- 聊天详情设置弹窗 -->
+        <div id="wechat-settings-modal">
+            <div class="ws-header">聊天详情</div>
+            <div class="ws-body">
+                <div>
+                    <div class="ws-section-title">基础资料</div>
+                    <div class="ws-card">
+                        <div class="ws-row">
+                            <div class="ws-label" id="labelFriendName">好友姓名</div>
+                            <input type="text" class="ws-input" id="wsFriendName" style="color:#333" placeholder="输入姓名">
+                        </div>
+                        <div class="ws-row">
+                            <div class="ws-label">备注名</div>
+                            <input type="text" class="ws-input" id="wsRemark" placeholder="点击添加备注">
+                        </div>
+                        <div class="ws-row" onclick="document.getElementById('wsAvatarInput').click()">
+                            <div class="ws-label" id="labelFriendAvatar">好友头像</div>
+                            <div class="ws-avatar-preview" id="wsFriendAvatar"></div>
+                            <div style="color:#ccc;margin-left:5px;">›</div>
+                        </div>
+                        <div class="ws-row" onclick="document.getElementById('wsBgInput').click()">
+                            <div class="ws-label">聊天背景</div>
+                            <div class="ws-avatar-preview" id="wsBgPreview" style="background:transparent;color:#999;font-size:12px;width:auto;">默认</div>
+                            <div style="color:#ccc;margin-left:5px;">›</div>
+                        </div>
+                        <div class="ws-row" onclick="document.getElementById('wsMyAvatarInput').click()">
+                            <div class="ws-label">我的头像</div>
+                            <div class="ws-avatar-preview" id="wsMyAvatar" style="background:#eee;color:#333">ME</div>
+                            <div style="color:#ccc;margin-left:5px;">›</div>
+                        </div>
+                        <div class="ws-row">
+                            <div class="ws-label">置顶聊天</div>
+                            <div style="flex-grow:1; display:flex; justify-content:flex-end;">
+                                <input type="checkbox" class="ios-switch" id="wsIsPinned">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div class="ws-section-title" id="titleFriendPersona">好友人设</div>
+                        <div class="ws-card">
+                            <div style="padding:10px;">
+                                <textarea class="ws-textarea" id="wsFriendPersona" placeholder="输入好友人设描述..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div class="ws-section-title">我的人设</div>
+                        <div class="ws-card">
+                            <div style="padding:10px;">
+                                <textarea class="ws-textarea" id="wsMyPersona" placeholder="输入我的人设描述..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div class="ws-section-title">记忆设置</div>
+                        <div class="ws-card">
+                            <div class="ws-row">
+                                <div class="ws-label" style="width:120px;">自动总结阈值</div>
+                                <input type="number" class="ws-input" id="wsMemoryThreshold" placeholder="默认20条" style="text-align:right;">
+                                <div style="margin-left:5px;color:#999;">条</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div class="ws-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+                            <span>记忆摘要罗列</span>
+                            <span style="color:#07C160;font-size:13px;cursor:pointer;padding:5px;" onclick="addManualMemoryFromSettings()">+ 添加</span>
+                        </div>
+                        <div class="ws-card" id="wsMemoryListContainer" style="min-height: 50px;">
+                            <!-- 动态渲染记忆项 -->
+                        </div>
+                    </div>
+
+                    <div style="margin-top:20px;">
+                        <div class="ws-section-title">气泡样式自定义 (CSS)</div>
+                        <div class="ws-card" style="padding: 15px;">
+                            <!-- Shadow DOM 预览容器 -->
+                            <div id="wsBubblePreviewContainer" style="width:100%; height:120px; background:#ededed; border-radius:8px; margin-bottom:10px; border:1px solid #eee;"></div>
+                            <textarea id="wsCustomCss" class="ws-textarea" placeholder="在此输入 CSS，例如：&#10;.chat-bubble { background: pink; }&#10;.self .chat-bubble { background: skyblue; }" style="font-family: monospace; font-size: 12px; background: #f9f9f9; padding: 10px; border-radius: 6px; height: 100px;" oninput="updateBubblePreview()"></textarea>
+                        </div>
+                    </div>
+                    <!-- 隐藏的设置 Inputs -->
+                    <input type="file" id="wsAvatarInput" accept="image/*" style="display:none" onchange="previewSettingsAvatar(this)">
+                    <input type="file" id="wsBgInput" accept="image/*" style="display:none" onchange="previewSettingsBg(this)">
+                    <input type="file" id="wsMyAvatarInput" accept="image/*" style="display:none" onchange="previewSettingsMyAvatar(this)">
+                </div>
+
+
+                <div style="margin-top: 20px;">
+                    <div class="ws-card" onclick="deleteCurrentContact()">
+                        <div class="ws-row" style="justify-content: center;">
+                            <span style="color: #ff3b30; font-size: 17px; font-weight: 600;">删除联系人</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="ws-footer">
+                <div class="ws-btn back" onclick="closeChatSettings()">返回</div>
+                <div class="ws-btn cancel" onclick="closeChatSettings()">取消</div>
+                <div class="ws-btn save" onclick="saveChatSettings()">保存</div>
+            </div>
+        </div>
+
+        <!-- 弹窗提醒 -->
+        <div class="toast" id="toast">操作成功</div>
+
+        <!-- iOS 风格弹窗 -->
+        <div class="ios-modal-mask" id="iosModal">
+            <div class="ios-modal">
+                <div class="ios-modal-content">
+                    <div class="ios-modal-title" id="iosModalTitle">标题</div>
+                    <div class="ios-modal-desc" id="iosModalDesc">描述内容</div>
+                </div>
+                <div class="ios-modal-actions">
+                    <div class="ios-modal-btn" id="iosModalCancelBtn" onclick="handleIOSDialog(false)">取消</div>
+                    <div class="ios-modal-btn bold" id="iosModalConfirmBtn" onclick="handleIOSDialog(true)">确定</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 隐藏的图片上传 -->
+        <input type="file" id="widgetBgInput" accept="image/*" style="display:none" onchange="updateWidgetBg(this)">
+
+        <!-- 模型选择弹窗 -->
+        <div class="ios-modal-mask" id="model-select-modal">
+            <div class="ios-modal" style="width: 340px; height: 500px; text-align: left;">
+                <div style="padding: 15px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.8);">
+                    <div style="font-size: 17px; font-weight: 600;">选择模型</div>
+                    <div style="color:#007aff; cursor:pointer; font-size: 16px;" onclick="closeModelModal()">关闭</div>
+                </div>
+                <div id="model-list-container" style="flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: rgba(255,255,255,0.5);">
+                    <!-- 动态填充 -->
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script>
-        // ================== 公共/切换逻辑 ==================
-        function switchToMemo() {
-            document.getElementById('page-home').style.display = 'none';
-            document.getElementById('page-memo').style.display = 'block';
-            // 切换到纪念日页时重新渲染列表（确保数据最新）
-            renderList();
+        // 数据存储
+        const defaultMemos = [
+            { id: 1, title: '购物清单', content: '1. 牛奶\n2. 面包\n3. 鸡蛋', pinned: true, date: '2026/1/5' },
+            { id: 2, title: '会议记录', content: '下午三点项目进度会', pinned: false, date: '2026/1/4' }
+        ];
+        // 尝试从 localStorage 读取
+        let memos = JSON.parse(localStorage.getItem('ios_memos')) || defaultMemos;
+        
+        // 通用弹窗回调
+        let iosDialogOnConfirm = null;
+        let iosDialogOnCancel = null;
+
+        let selectionMode = false;
+        let selectedMemoIds = new Set();
+        let longPressTimer;
+        let activeMemoId = null; 
+        let isExpanded = false;
+        let currentEditingId = null; 
+        let initialTitle = '';
+        let initialContent = '';
+        
+        // 微信聊天数据
+        let currentChatUser = '';
+        let currentChatAvatar = '';
+        let currentChatColor = '';
+        let shadowRoot = null; // 用于样式预览
+        
+        // 临时存储设置中的图片数据，保存时才应用
+        let tempAvatarData = null;
+        let tempBgData = null;
+        let tempMyAvatarData = null;
+
+        // 存储好友详细设置
+        let chatSettingsMap = JSON.parse(localStorage.getItem('ios_chat_settings')) || {};
+        
+        // API 设置
+        let apiSettings = JSON.parse(localStorage.getItem('ios_api_settings')) || {
+            endpoint: '',
+            key: '',
+            model: ''
+        };
+        
+        // 聊天计数器（用于触发记忆）
+        let chatMessageCounts = {};
+
+        // 聊天列表数据
+        const defaultChats = [
+            { name: '文件传输助手', avatarClass: 'green', avatarText: '📁', bg: '#07C160', time: '19:20', msg: '[图片]' },
+            { name: '妈妈', avatarClass: 'orange', avatarText: '👩', bg: '#fa9d3b', time: '18:30', msg: '今晚回家吃饭吗？做了你爱吃的。' },
+            { name: '产品经理', avatarClass: 'blue', avatarText: '👔', bg: '#10aeff', time: '14:05', msg: '这个需求还得改一下，客户说要五彩斑斓的黑。' },
+            { name: '订阅号消息', avatarClass: '', avatarText: '📰', bg: '#576b95', time: '10:00', msg: '小霁的小手机更新啦！点击查看详情。' },
+            { name: '游戏中心', avatarClass: '', avatarText: '🎮', bg: '#dbdbdb', time: '昨天', msg: '好友张三送了你一颗爱心。' }
+        ];
+        let chatListState = JSON.parse(localStorage.getItem('ios_chat_list')) || defaultChats;
+
+        function saveMemosToStorage() {
+            localStorage.setItem('ios_memos', JSON.stringify(memos));
+        }
+        function saveChatSettingsToStorage() {
+            localStorage.setItem('ios_chat_settings', JSON.stringify(chatSettingsMap));
+        }
+        function saveChatListToStorage() {
+            localStorage.setItem('ios_chat_list', JSON.stringify(chatListState));
         }
 
-        function switchToHome() {
-            document.getElementById('page-memo').style.display = 'none';
-            document.getElementById('page-home').style.display = 'block';
-            // 切换回主页时更新数据
-            loadSharedData();
-        }
+        // 初始化
+        renderMemos();
+        renderChatList();
 
-        // ================== 主页逻辑 ==================
-        document.addEventListener('DOMContentLoaded', () => {
-            // 初始化两个页面的数据
-            loadSharedData();
-            loadUserData();
-            loadMemoData(); // 加载纪念日页数据
+        // 全局：返回桌面
+        function showDesktop() {
+            // 关闭所有 App
+            document.querySelectorAll('.app-container').forEach(el => el.classList.remove('active'));
+            document.getElementById('phoneScreen').classList.remove('app-active');
             
-            document.querySelector('.input-box').addEventListener('input', handleInputSave);
-            
-            // 初始化日期选择器为今天
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('dateInput').value = today;
-        });
-
-        function loadUserData() {
-            const avatar = localStorage.getItem('user_avatar');
-            if (avatar) document.querySelector('.avatar').style.backgroundImage = `url('${avatar}')`;
-            
-            const text = localStorage.getItem('user_status_text');
-            if (text) document.querySelector('.input-box').value = text;
+            // 清理状态
+            exitSelectionMode(); 
+            hideSettingsMenu();
+            if (document.getElementById('memo-create-modal').classList.contains('active')) {
+                 closeCreateModal();
+            }
+            // 重置微信状态
+            closeChatDetail();
+            // 之前有关闭群聊列表页的逻辑，现已废弃
+            document.getElementById('wechat-plus-menu').classList.remove('active');
+            closeWeChatInputModal();
+            closeChatSettings();
         }
 
-        function handleInputSave(e) {
-            localStorage.setItem('user_status_text', e.target.value);
+        // 设置 App 逻辑
+        function openSettingsApp() {
+            document.getElementById('settings-app').classList.add('active');
+            document.getElementById('phoneScreen').classList.add('app-active');
+            
+            // 加载设置到输入框
+            document.getElementById('apiEndpoint').value = apiSettings.endpoint || '';
+            document.getElementById('apiKey').value = apiSettings.key || '';
+            document.getElementById('apiModel').value = apiSettings.model || '';
         }
 
-        function openAvatarModal() { document.getElementById('avatarModalOverlay').style.display = 'flex'; }
-        function closeAvatarModal() { document.getElementById('avatarModalOverlay').style.display = 'none'; }
+        function saveApiSettings() {
+            const endpoint = document.getElementById('apiEndpoint').value.trim();
+            const key = document.getElementById('apiKey').value.trim();
+            const model = document.getElementById('apiModel').value.trim();
+            
+            apiSettings = { endpoint, key, model };
+            localStorage.setItem('ios_api_settings', JSON.stringify(apiSettings));
+            
+            showToast('设置已保存');
+            
+            // 可选：添加震动反馈或模拟网络测试
+        }
 
-        function handleAvatarFile(input) {
+        // ----------------- 模型列表获取逻辑 -----------------
+        async function fetchModelList() {
+            const endpoint = document.getElementById('apiEndpoint').value.trim();
+            const key = document.getElementById('apiKey').value.trim();
+
+            if (!endpoint) {
+                showToast('请先输入接口地址');
+                return;
+            }
+
+            // 简单的加载提示
+            showToast('正在获取模型...');
+            
+            try {
+                // 构造 URL，通常是 /v1/models
+                // 如果用户输入的是 https://api.openai.com/v1，则去掉 /v1 后的斜杠再拼接
+                let baseUrl = endpoint;
+                if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+                // 许多兼容接口是 /v1/models，但也有些是直接 /models，这里假设标准 OpenAI 格式
+                const url = `${baseUrl}/models`;
+
+                const headers = {};
+                if (key) {
+                    headers['Authorization'] = `Bearer ${key}`;
+                }
+
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // 解析数据
+                let models = [];
+                if (Array.isArray(data.data)) {
+                    models = data.data; // 标准 OpenAI 格式
+                } else if (Array.isArray(data)) {
+                    models = data; // 某些非标准接口
+                } else {
+                    console.error('无法解析模型数据:', data);
+                    showToast('数据格式无法识别');
+                    return;
+                }
+
+                // 排序：简单的按字母排序
+                models.sort((a, b) => (a.id || '').localeCompare(b.id || ''));
+
+                renderModelList(models);
+                document.getElementById('model-select-modal').classList.add('active');
+
+            } catch (error) {
+                console.error('获取模型失败:', error);
+                showToast('获取失败: ' + error.message);
+            }
+        }
+
+        function renderModelList(models) {
+            const container = document.getElementById('model-list-container');
+            container.innerHTML = '';
+
+            if (models.length === 0) {
+                container.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">未找到模型</div>';
+                return;
+            }
+
+            models.forEach(model => {
+                const div = document.createElement('div');
+                div.style.padding = '12px 15px';
+                div.style.borderBottom = '1px solid rgba(0,0,0,0.05)';
+                div.style.cursor = 'pointer';
+                div.style.fontSize = '15px';
+                div.style.display = 'flex';
+                div.style.justifyContent = 'space-between';
+                div.style.alignItems = 'center';
+                
+                // 选中高亮
+                const currentModel = document.getElementById('apiModel').value.trim();
+                const isSelected = model.id === currentModel;
+                if (isSelected) {
+                    div.style.color = '#007aff';
+                    div.style.fontWeight = '600';
+                } else {
+                    div.style.color = '#333';
+                }
+
+                div.onclick = () => selectModel(model.id);
+
+                div.innerHTML = `
+                    <span>${model.id}</span>
+                    ${isSelected ? '<span style="color:#007aff;">✓</span>' : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function selectModel(modelId) {
+            document.getElementById('apiModel').value = modelId;
+            closeModelModal();
+            // 这里不自动保存，让用户手动点保存，或者你可以选择自动保存
+            // showToast('已选择 ' + modelId);
+        }
+
+        function closeModelModal() {
+            document.getElementById('model-select-modal').classList.remove('active');
+        }
+
+        // 备忘录 App 逻辑
+        function openMemoApp() {
+            document.getElementById('memo-app').classList.add('active');
+            document.getElementById('phoneScreen').classList.add('app-active');
+            exitSelectionMode(); 
+            hideSettingsMenu();
+        }
+
+        // 微信 App 逻辑
+        function openWeChatApp() {
+            document.getElementById('wechat-app').classList.add('active');
+            document.getElementById('phoneScreen').classList.add('app-active');
+        }
+
+        function switchWeChatTab(index) {
+            // 切换 Tab 样式
+            const tabs = document.querySelectorAll('.wechat-tab');
+            tabs.forEach((tab, i) => {
+                if (i === index) tab.classList.add('active');
+                else tab.classList.remove('active');
+            });
+            
+            // 切换页面
+            const pages = document.querySelectorAll('.wechat-page');
+            pages.forEach((page, i) => {
+                if (i === index) page.classList.add('active');
+                else page.classList.remove('active');
+            });
+        }
+        
+        function openChatDetail(name, colorClass, emoji) {
+            currentChatUser = name;
+            currentChatColor = colorClass; 
+            currentChatAvatar = emoji; 
+            
+            // 初始化数据
+            if (!chatSettingsMap[name]) {
+                chatSettingsMap[name] = {
+                    remark: '',
+                    friendPersona: '',
+                    myPersona: ''
+                };
+            }
+
+            // 初始化该会话的临时计数器（如果不存在）
+            if (typeof chatMessageCounts[name] === 'undefined') {
+                chatMessageCounts[name] = 0;
+            }
+            
+            // 显示名字（优先显示备注）
+            const data = chatSettingsMap[name];
+            document.getElementById('chatTitle').innerText = data.remark || name;
+            
+            // 应用聊天背景
+            const detailPage = document.getElementById('wechat-chat-detail');
+            if (data.chatBg) {
+                detailPage.style.backgroundImage = `url(${data.chatBg})`;
+                detailPage.style.backgroundSize = 'cover';
+                detailPage.style.backgroundPosition = 'center';
+            } else {
+                detailPage.style.backgroundImage = 'none';
+                detailPage.style.backgroundColor = '#ededed';
+            }
+
+            const chatBody = document.getElementById('chatBody');
+            chatBody.innerHTML = ''; // 清空
+
+            // 渲染记忆条
+            updateMemoryBar();
+            
+            // 仅对预设好友模拟消息，对新添加的好友保持空白
+            const presetFriends = ['文件传输助手', '妈妈', '产品经理'];
+            if (presetFriends.includes(name)) {
+                addChatMessage(name, '你好！', false);
+                addChatMessage(name, '最近怎么样？', false);
+            }
+            
+            // 应用自定义 CSS
+            const dynamicStyle = document.getElementById('dynamic-chat-style');
+            if (data.customCss) {
+                dynamicStyle.innerHTML = data.customCss;
+            } else {
+                dynamicStyle.innerHTML = '';
+            }
+            
+            document.getElementById('wechat-chat-detail').classList.add('active');
+        }
+        
+        function closeChatDetail() {
+            document.getElementById('wechat-chat-detail').classList.remove('active');
+            document.getElementById('memory-list-panel').classList.remove('active');
+            // 清理自定义样式
+            document.getElementById('dynamic-chat-style').innerHTML = '';
+        }
+        
+        function updateMemoryBar() {
+            const settings = chatSettingsMap[currentChatUser] || {};
+            const memories = settings.memoryList || [];
+            const bar = document.getElementById('memory-bar');
+            
+            if (memories.length > 0) {
+                bar.style.display = 'flex';
+                bar.querySelector('span').innerText = `✨ 存在 ${memories.length} 条记忆摘要，点击查看`;
+            } else {
+                bar.style.display = 'none';
+            }
+        }
+        
+        function toggleMemoryPanel() {
+            const panel = document.getElementById('memory-list-panel');
+            if (panel.classList.contains('active')) {
+                panel.classList.remove('active');
+            } else {
+                renderMemoryList();
+                panel.classList.add('active');
+            }
+        }
+        
+        function renderMemoryList() {
+            const settings = chatSettingsMap[currentChatUser] || {};
+            const memories = settings.memoryList || [];
+            const panel = document.getElementById('memory-list-panel');
+            panel.innerHTML = '';
+
+            // 添加手动添加按钮
+            const addBtn = document.createElement('div');
+            addBtn.className = 'memory-add-btn';
+            addBtn.innerText = '+ 手动添加记忆';
+            addBtn.onclick = addManualMemory;
+            panel.appendChild(addBtn);
+            
+            if (memories.length === 0) {
+                const emptyTip = document.createElement('div');
+                emptyTip.style.textAlign = 'center';
+                emptyTip.style.color = '#999';
+                emptyTip.style.padding = '10px';
+                emptyTip.innerText = '暂无记忆';
+                panel.appendChild(emptyTip);
+                return;
+            }
+            
+            // 倒序显示，为了方便操作，我们给每个 item 绑定原始 index
+            // 原数组索引：0是旧，length-1是新
+            // 显示时：新在顶
+            // 所以遍历时，index 是原数组的 index
+            
+            // 为了正确处理 index，我们直接拷贝一份带 index 的数据，然后 reverse
+            const displayList = memories.map((m, i) => ({...m, originalIndex: i})).reverse();
+
+            displayList.forEach(mem => {
+                const div = document.createElement('div');
+                div.className = 'memory-item';
+                div.id = `memory-item-${mem.originalIndex}`;
+                
+                // 正常显示模式
+                const viewHTML = `
+                    <div class="memory-header">
+                        <div class="memory-time">${mem.time}</div>
+                        <div class="memory-actions">
+                            <span class="memory-action-btn" onclick="toggleEditMemory(${mem.originalIndex})" title="编辑/精简">✏️</span>
+                            <span class="memory-action-btn" style="color:#ff3b30" onclick="deleteMemory(${mem.originalIndex})" title="删除">🗑️</span>
+                        </div>
+                    </div>
+                    <div class="memory-text">${mem.content}</div>
+                `;
+                
+                // 编辑模式 HTML (隐藏，通过 JS 切换)
+                const editHTML = `
+                    <div class="memory-header" style="margin-bottom:5px;">
+                        <div class="memory-time">编辑记忆</div>
+                    </div>
+                    <textarea class="memory-textarea" id="memory-edit-${mem.originalIndex}">${mem.content}</textarea>
+                    <div class="memory-edit-footer">
+                        <div class="memory-btn-sm" onclick="toggleEditMemory(${mem.originalIndex})">取消</div>
+                        <div class="memory-btn-sm memory-btn-save" onclick="saveMemoryEdit(${mem.originalIndex})">保存</div>
+                    </div>
+                `;
+
+                div.innerHTML = viewHTML;
+                div.dataset.editMode = 'false';
+                
+                // 挂载切换逻辑
+                div.dataset.viewHtml = viewHTML;
+                div.dataset.editHtml = editHTML;
+
+                panel.appendChild(div);
+            });
+        }
+
+        function toggleEditMemory(index) {
+            const div = document.getElementById(`memory-item-${index}`);
+            if (!div) return;
+            
+            const isEdit = div.dataset.editMode === 'true';
+            
+            if (isEdit) {
+                // 切换回查看
+                div.innerHTML = div.dataset.viewHtml;
+                div.dataset.editMode = 'false';
+            } else {
+                // 切换到编辑
+                div.innerHTML = div.dataset.editHtml;
+                div.dataset.editMode = 'true';
+            }
+        }
+
+        function saveMemoryEdit(index) {
+            const textarea = document.getElementById(`memory-edit-${index}`);
+            if (!textarea) return;
+            
+            const newContent = textarea.value.trim();
+            if (!newContent) {
+                showToast('内容不能为空');
+                return;
+            }
+            
+            const settings = chatSettingsMap[currentChatUser];
+            if (settings && settings.memoryList && settings.memoryList[index]) {
+                settings.memoryList[index].content = newContent;
+                saveChatSettingsToStorage();
+                showToast('记忆已更新');
+                renderMemoryList(); // 重新渲染
+            }
+        }
+
+        function deleteMemory(index) {
+            if (!confirm('确定删除这条记忆吗？')) return;
+            
+            const settings = chatSettingsMap[currentChatUser];
+            if (settings && settings.memoryList) {
+                settings.memoryList.splice(index, 1);
+                saveChatSettingsToStorage();
+                showToast('记忆已删除');
+                renderMemoryList();
+                updateMemoryBar();
+            }
+        }
+
+        function addManualMemory() {
+            const content = prompt("请输入记忆内容：");
+            if (content && content.trim()) {
+                const settings = chatSettingsMap[currentChatUser];
+                if (!settings.memoryList) settings.memoryList = [];
+                // 添加到列表
+                settings.memoryList.push({
+                    time: new Date().toLocaleString(),
+                    content: content.trim()
+                });
+                saveChatSettingsToStorage();
+                renderMemoryList();
+                updateMemoryBar();
+                showToast("已添加记忆");
+            }
+        }
+
+        // 链接模块相关
+        function showLinkInputModal() {
+            hideWeChatMenu();
+            document.getElementById('link-input-modal').classList.add('active');
+            // 清空
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('linkTitle').value = '';
+            document.getElementById('linkDesc').value = '';
+            document.getElementById('linkImg').value = '';
+            document.getElementById('linkLoading').style.display = 'none';
+        }
+
+        function closeLinkInputModal() {
+            document.getElementById('link-input-modal').classList.remove('active');
+        }
+
+        function simulateLinkPreview() {
+            const url = document.getElementById('linkUrl').value;
+            const titleInput = document.getElementById('linkTitle');
+            const descInput = document.getElementById('linkDesc');
+            
+            // 如果已有内容，不覆盖
+            if (titleInput.value || !url) return;
+
+            document.getElementById('linkLoading').style.display = 'block';
+            
+            // 模拟延迟读取
+            setTimeout(() => {
+                document.getElementById('linkLoading').style.display = 'none';
+                
+                // 简单的模拟生成
+                let domain = '未知网站';
+                try {
+                    domain = new URL(url).hostname;
+                } catch(e) {}
+                
+                titleInput.value = `来自 ${domain} 的精彩内容`;
+                descInput.value = `点击查看关于 ${url} 的详细信息。这是一个模拟的链接读取预览效果。`;
+                // 随机放一个 placeholder 图片
+                document.getElementById('linkImg').value = 'https://api.iconify.design/mdi:web.svg?color=%23888888';
+                
+            }, 800);
+        }
+
+        function sendLinkMessage() {
+            const url = document.getElementById('linkUrl').value;
+            const title = document.getElementById('linkTitle').value;
+            const desc = document.getElementById('linkDesc').value;
+            const img = document.getElementById('linkImg').value;
+            
+            if (!url) {
+                showToast('请输入链接');
+                return;
+            }
+            if (!title) {
+                showToast('请输入标题');
+                return;
+            }
+
+            const msgData = {
+                type: 'link',
+                url: url,
+                title: title,
+                desc: desc,
+                img: img
+            };
+            
+            // 发送消息
+            addChatMessage('我', msgData, true); // 我发送
+            
+            closeLinkInputModal();
+        }
+
+        function openLinkPreview(data) {
+            const modal = document.getElementById('link-preview-modal');
+            const titleEl = document.getElementById('lpHeaderTitle');
+            const contentEl = document.getElementById('lpContent');
+            
+            titleEl.innerText = data.title || '网页浏览';
+            
+            // 模拟网页内容
+            const imgHtml = data.img ? `<img src="${data.img}" class="lp-img">` : '';
+            const dateStr = new Date().toLocaleDateString();
+            
+            contentEl.innerHTML = `
+                <div class="lp-article-title">${data.title}</div>
+                <div class="lp-meta">小霁的小手机 · ${dateStr}</div>
+                ${imgHtml}
+                <div class="lp-text">
+                    <p>${data.desc || '暂无摘要'}</p>
+                    <br>
+                    <p>这是一个模拟的链接预览页面。在真实应用中，这里会通过 iframe 加载 ${data.url}，或者通过后端 API 抓取网页正文内容并渲染。</p>
+                    <p>当前页面仅仅展示了从卡片传递过来的元数据信息。</p>
+                    <br>
+                    <div style="padding:15px;background:#f5f5f5;border-radius:8px;font-size:12px;color:#888;word-break:break-all;">
+                        原始链接：${data.url}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+        
+        function closeLinkPreview() {
+            document.getElementById('link-preview-modal').classList.remove('active');
+        }
+
+        function checkAndGenerateMemory() {
+            const name = currentChatUser;
+            const settings = chatSettingsMap[name] || {};
+            const threshold = parseInt(settings.memoryThreshold) || 20; // 默认20条
+            
+            if (!chatMessageCounts[name]) chatMessageCounts[name] = 0;
+            chatMessageCounts[name]++;
+            
+            if (chatMessageCounts[name] >= threshold) {
+                // 触发总结
+                chatMessageCounts[name] = 0; // 重置计数
+                
+                // 模拟生成摘要
+                const time = new Date().toLocaleString();
+                const summaryContent = `[自动总结] 在最近的 ${threshold} 条对话中，双方交流愉快。用户表现出了对细节的关注，${name} 给予了积极的回应。`;
+                
+                if (!settings.memoryList) settings.memoryList = [];
+                settings.memoryList.push({
+                    time: time,
+                    content: summaryContent
+                });
+                
+                saveChatSettingsToStorage();
+                updateMemoryBar();
+                
+                // 如果面板打开，实时更新
+                if (document.getElementById('memory-list-panel').classList.contains('active')) {
+                    renderMemoryList();
+                }
+
+                // 如果设置页打开，也实时更新
+                if (document.getElementById('wechat-settings-modal').classList.contains('active')) {
+                    renderSettingsMemoryList();
+                }
+                
+                showToast('✨ 已生成新的记忆摘要');
+            }
+        }
+        
+        function addChatMessage(name, text, isSelf, senderInfo = null) {
+            const row = document.createElement('div');
+            row.className = `chat-msg-row ${isSelf ? 'self' : ''}`;
+            
+            // 头像
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = `chat-avatar`;
+            
+            const settings = chatSettingsMap[currentChatUser] || {};
+            
+            if (isSelf) {
+                // 自己的头像
+                if (settings.myAvatarData) {
+                    avatarDiv.style.background = 'transparent';
+                    avatarDiv.innerHTML = `<img src="${settings.myAvatarData}" style="width:100%;height:100%;object-fit:cover;">`;
+                } else {
+                    avatarDiv.style.background = '#eee';
+                    avatarDiv.innerHTML = 'ME'; 
+                    avatarDiv.style.color = '#333';
+                    avatarDiv.style.fontWeight = 'bold';
+                    avatarDiv.style.fontSize = '12px';
+                }
+            } else {
+                // 对方 (单聊好友 或 群聊成员)
+                let targetName = currentChatUser;
+                let targetSettings = settings;
+                
+                if (senderInfo) {
+                    // 群聊中的具体发送者
+                    targetName = senderInfo.name;
+                    targetSettings = chatSettingsMap[targetName] || {};
+                    
+                    // 尝试查找颜色
+                    const memberInList = chatListState.find(c => c.name === targetName);
+                    if (memberInList && memberInList.avatarClass) {
+                        avatarDiv.classList.add(memberInList.avatarClass);
+                    } else {
+                        avatarDiv.style.background = '#ddd'; 
+                    }
+                } else {
+                    // 单聊
+                    if (currentChatColor) avatarDiv.classList.add(currentChatColor);
+                }
+
+                if (targetSettings.avatarData) {
+                    avatarDiv.style.background = 'transparent';
+                    avatarDiv.innerHTML = `<img src="${targetSettings.avatarData}" style="width:100%;height:100%;object-fit:cover;">`;
+                } else {
+                    if (senderInfo) {
+                        // 群聊成员默认文字头像
+                        avatarDiv.innerText = targetName[0];
+                        avatarDiv.style.fontSize = '14px';
+                        avatarDiv.style.color = '#fff';
+                        avatarDiv.style.display = 'flex';
+                        avatarDiv.style.justifyContent = 'center';
+                        avatarDiv.style.alignItems = 'center';
+                    } else {
+                        // 单聊默认 Emoji
+                        avatarDiv.innerHTML = currentChatAvatar;
+                        avatarDiv.style.fontSize = '24px';
+                    }
+                }
+            }
+            
+            // 消息内容包裹层
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'chat-msg-content';
+
+            // 显示名字 (群聊且非自己)
+            if (!isSelf && senderInfo) {
+                const nameDiv = document.createElement('div');
+                nameDiv.className = 'chat-msg-name';
+                nameDiv.innerText = senderInfo.name;
+                nameDiv.style.display = 'block';
+                contentDiv.appendChild(nameDiv);
+            }
+            
+            // 气泡内容处理
+            if (typeof text === 'object' && text.type === 'link') {
+                // 渲染链接卡片
+                const card = document.createElement('div');
+                card.className = 'chat-link-card';
+                card.onclick = () => openLinkPreview(text);
+                
+                const thumbHtml = text.img ? `<img src="${text.img}" class="link-card-thumb">` : `<div class="link-card-thumb" style="display:flex;justify-content:center;align-items:center;color:#999;font-size:24px;">🔗</div>`;
+                
+                card.innerHTML = `
+                    <div class="link-card-title">${text.title}</div>
+                    <div class="link-card-content">
+                        <div class="link-card-desc">${text.desc || text.url}</div>
+                        ${thumbHtml}
+                    </div>
+                    <div class="link-card-footer">
+                        <svg style="width:12px;height:12px;fill:#aaa;" viewBox="0 0 24 24"><path d="M12,2C6.48,2,2,6.48,2,12s4.48,10,10,10s10-4.48,10-10S17.52,2,12,2z M11,17h2v-6h-2V17z M12,9c0.55,0,1-0.45,1-1c0-0.55-0.45-1-1-1s-1,0.45-1,1C11,8.55,11.45,9,12,9z"/></svg>
+                        网页链接
+                    </div>
+                `;
+                
+                // 卡片不需要外层气泡背景，直接作为 content
+                contentDiv.appendChild(card);
+                
+            } else {
+                // 普通文本气泡
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble';
+                bubble.innerText = text;
+                contentDiv.appendChild(bubble);
+            }
+            
+            row.appendChild(avatarDiv);
+            row.appendChild(contentDiv);
+            
+            document.getElementById('chatBody').appendChild(row);
+            
+            // 滚动到底部
+            const chatBody = document.getElementById('chatBody');
+            chatBody.scrollTop = chatBody.scrollHeight;
+            
+            // 检查记忆触发
+            checkAndGenerateMemory();
+        }
+
+        // 辅助函数：根据人设生成回复
+        function getReplyFromPersona(persona, name) {
+            persona = (persona || '').toLowerCase();
+            name = (name || '').toLowerCase();
+            
+            let replies = ['收到！', '哈哈哈哈', '确实', '好的，没问题', '稍等一下'];
+
+            if (persona.includes('妈妈') || persona.includes('母亲') || name.includes('妈')) {
+                replies = ['多穿点衣服', '什么时候回家吃饭？', '别太累了', '记得喝水', '家里都好', '早点休息', '钱够不够花？', '天气冷了注意保暖'];
+            } else if (persona.includes('老板') || persona.includes('经理') || persona.includes('工作')) {
+                replies = ['这个方案再改改', '收到', '明天开会细说', '辛苦了', '这个需求很急', '还没做完吗？', '绩效考核要注意', '来我办公室一趟'];
+            } else if (persona.includes('高冷')) {
+                replies = ['嗯', '哦', '已读', '...', '行', '？', '没空', '再说'];
+            } else if (persona.includes('热情') || persona.includes('可爱') || persona.includes('舔狗')) {
+                replies = ['哇塞太棒了！😍', '你说的都对！', '天哪真的吗？', '随时待命！', '好呀好呀！', '贴贴~', '想你啦！', '今天也是元气满满的一天！'];
+            } else if (persona.includes('暴躁') || persona.includes('生气')) {
+                replies = ['别烦我', '滚', '你再说一遍？', '无语', '大姐你没事吧', '这是人干的事？', '气死我了', '一边玩去'];
+            } else if (persona.includes('群聊成员') || persona.includes('member')) {
+                replies = ['哈哈', '这就去', '带我一个', '666', '笑死', '真的假的', '加一', '同上', '太强了'];
+            }
+            
+            return replies[Math.floor(Math.random() * replies.length)];
+        }
+        
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            // 发送自己的消息
+            addChatMessage('我', text, true);
+            input.value = '';
+            
+            // 取消自动回复，改为手动触发
+        }
+
+        // 手动触发 AI 回复
+        function triggerAIResponse(isRegenerate) {
+            if (isRegenerate) {
+                // 重新生成：删除最后一条对方的消息
+                const chatBody = document.getElementById('chatBody');
+                const lastMsg = chatBody.lastElementChild;
+                if (lastMsg && !lastMsg.classList.contains('self')) {
+                    lastMsg.remove();
+                } else {
+                    // 如果最后一条不是对方消息，提示无法重生成
+                    showToast('没有可重生成的回复');
+                    return;
+                }
+            }
+
+            const settings = chatSettingsMap[currentChatUser] || {};
+            const isGroup = !!settings.members;
+            const delay = isRegenerate ? 300 : 1000;
+
+            if (isGroup) {
+                // 群聊逻辑：全员接龙回复
+                const members = settings.members;
+                if (!members || members.length === 0) {
+                    // 如果数据异常，回落到默认
+                    setTimeout(() => {
+                        addChatMessage(currentChatUser, '（群里没人说话）', false);
+                    }, delay);
+                    return;
+                }
+
+                // 遍历所有成员回复
+                members.forEach((member, index) => {
+                    const speakerSettings = chatSettingsMap[member] || {};
+                    const persona = (speakerSettings.friendPersona || '').toLowerCase();
+                    const reply = getReplyFromPersona(persona, member);
+                    
+                    // 模拟陆陆续续回复：基础延迟 + 顺序间隔 + 随机波动
+                    const sequenceDelay = index * 1500; // 每个人间隔约1.5秒
+                    const randomJitter = Math.random() * 1000; // 随机波动1秒内
+                    const finalDelay = delay + sequenceDelay + randomJitter;
+
+                    setTimeout(() => {
+                        addChatMessage(currentChatUser, reply, false, { name: member });
+                    }, finalDelay);
+                });
+
+            } else {
+                // 单聊逻辑
+                const persona = (settings.friendPersona || '').toLowerCase();
+                const name = currentChatUser.toLowerCase();
+                
+                const reply = getReplyFromPersona(persona, name);
+
+                setTimeout(() => {
+                    addChatMessage(currentChatUser, reply, false);
+                }, delay);
+            }
+        }
+
+
+        // 渲染备忘录列表
+        function renderMemos() {
+            const list = document.getElementById('memoList');
+            list.innerHTML = '';
+            
+            // 排序：置顶的在前
+            memos.sort((a, b) => (b.pinned - a.pinned) || (b.id - a.id));
+
+            memos.forEach(memo => {
+                const div = document.createElement('div');
+                div.className = `memo-item ${memo.pinned ? 'pinned' : ''} ${selectedMemoIds.has(memo.id) ? 'selected' : ''}`;
+                
+                // 长按逻辑
+                div.onmousedown = (e) => startLongPress(e, memo.id);
+                div.ontouchstart = (e) => startLongPress(e, memo.id);
+                div.onmouseup = cancelLongPress;
+                div.ontouchend = cancelLongPress;
+                div.onmousemove = cancelLongPress; // 移动取消
+
+                // 点击逻辑
+                div.onclick = () => handleMemoClick(memo.id);
+
+                div.innerHTML = `
+                    <div class="memo-select-circle"></div>
+                    <div class="memo-info">
+                        <div class="memo-item-title">${memo.title || '无标题'}</div>
+                        <div class="memo-item-preview">${memo.content || '无内容'}</div>
+                        <div class="memo-item-date">${memo.date}</div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        // 新建/编辑备忘录
+        function openMemoModal(memoId = null) {
+            document.getElementById('memo-create-modal').classList.add('active');
+            
+            if (memoId) {
+                // 编辑模式
+                currentEditingId = memoId;
+                const memo = memos.find(m => m.id === memoId);
+                initialTitle = memo.title;
+                initialContent = memo.content;
+            } else {
+                // 新建模式
+                currentEditingId = null;
+                initialTitle = '';
+                initialContent = '';
+            }
+            document.getElementById('newMemoTitle').value = initialTitle;
+            document.getElementById('newMemoContent').value = initialContent;
+        }
+
+        function toggleExpandModal() {
+            const modal = document.getElementById('memo-create-modal');
+            isExpanded = !isExpanded;
+            if (isExpanded) {
+                modal.classList.add('expanded');
+            } else {
+                modal.classList.remove('expanded');
+            }
+        }
+
+        function tryCloseCreateModal() {
+            const currentTitle = document.getElementById('newMemoTitle').value;
+            const currentContent = document.getElementById('newMemoContent').value;
+
+            // 检测更改
+            if (currentTitle !== initialTitle || currentContent !== initialContent) {
+                showIOSDialog(
+                    '希望保存更改吗？',
+                    '您的修改尚未保存。',
+                    () => { saveMemo(); },      // 确定 -> 保存
+                    () => { closeCreateModal(); }, // 取消 -> 不保存（直接关闭）
+                    '不保存',
+                    '保存'
+                );
+            } else {
+                closeCreateModal();
+            }
+        }
+
+        // 通用弹窗逻辑
+        function showIOSDialog(title, desc, onConfirm, onCancel = null, cancelText = '取消', confirmText = '确定') {
+            document.getElementById('iosModalTitle').innerText = title;
+            document.getElementById('iosModalDesc').innerText = desc;
+            document.getElementById('iosModalCancelBtn').innerText = cancelText;
+            document.getElementById('iosModalConfirmBtn').innerText = confirmText;
+            
+            // 设置样式：如果是“删除”操作，确定按钮通常为红色；如果是“保存”，通常加粗。
+            // 这里简单处理：如果 confirmText 是 '删除'，加个红色样式类（可选，暂不实现复杂样式切换，保持 bold）
+            const confirmBtn = document.getElementById('iosModalConfirmBtn');
+            if (confirmText === '删除') {
+                confirmBtn.style.color = '#ff3b30';
+            } else {
+                confirmBtn.style.color = '#007aff';
+            }
+
+            iosDialogOnConfirm = onConfirm;
+            iosDialogOnCancel = onCancel;
+            
+            document.getElementById('iosModal').classList.add('active');
+        }
+
+        function handleIOSDialog(isConfirm) {
+            document.getElementById('iosModal').classList.remove('active');
+            if (isConfirm) {
+                if (iosDialogOnConfirm) iosDialogOnConfirm();
+            } else {
+                if (iosDialogOnCancel) iosDialogOnCancel();
+            }
+            // Reset
+            iosDialogOnConfirm = null;
+            iosDialogOnCancel = null;
+        }
+
+        function closeCreateModal() {
+            const modal = document.getElementById('memo-create-modal');
+            modal.classList.remove('active');
+            modal.classList.remove('expanded');
+            isExpanded = false;
+            currentEditingId = null;
+        }
+
+        function saveMemo() {
+            const title = document.getElementById('newMemoTitle').value;
+            const content = document.getElementById('newMemoContent').value;
+            
+            if (!title && !content) {
+                closeCreateModal();
+                return;
+            }
+
+            if (currentEditingId) {
+                // 更新现有
+                const idx = memos.findIndex(m => m.id === currentEditingId);
+                if (idx !== -1) {
+                    memos[idx].title = title;
+                    memos[idx].content = content;
+                    memos[idx].date = new Date().toLocaleDateString();
+                }
+            } else {
+                // 新增
+                const newMemo = {
+                    id: Date.now(),
+                    title: title,
+                    content: content,
+                    pinned: false,
+                    date: new Date().toLocaleDateString()
+                };
+                memos.unshift(newMemo);
+            }
+            
+            saveMemosToStorage();
+            renderMemos();
+            closeCreateModal();
+            showToast('已保存');
+        }
+
+        // 长按菜单
+        function startLongPress(e, id) {
+            if (selectionMode) return;
+            activeMemoId = id;
+            longPressTimer = setTimeout(() => {
+                showContextMenu(e);
+            }, 600);
+        }
+
+        function cancelLongPress() {
+            clearTimeout(longPressTimer);
+        }
+
+        function showContextMenu(e) {
+            const menu = document.getElementById('context-menu');
+            let x = e.clientX || e.touches[0].clientX;
+            let y = e.clientY || e.touches[0].clientY;
+            
+            if (x > 220) x = 220;
+            if (y > 700) y = 700;
+
+            menu.style.left = x + 'px';
+            menu.style.top = y + 'px';
+            menu.style.display = 'block';
+
+            setTimeout(() => {
+                document.addEventListener('click', hideContextMenu, { once: true });
+            }, 100);
+        }
+
+        function hideContextMenu() {
+            document.getElementById('context-menu').style.display = 'none';
+        }
+
+        function handleMenuAction(action) {
+            if (!activeMemoId) return;
+            const idx = memos.findIndex(m => m.id === activeMemoId);
+            if (idx === -1) return;
+
+            if (action === 'delete') {
+                memos.splice(idx, 1);
+                saveMemosToStorage();
+                showToast('已删除');
+            } else if (action === 'pin') {
+                memos[idx].pinned = !memos[idx].pinned;
+                saveMemosToStorage();
+                showToast(memos[idx].pinned ? '已置顶' : '已取消置顶');
+            }
+            renderMemos();
+        }
+
+        // 设置菜单逻辑
+        function openMemoSettings(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('settings-menu');
+            if (menu.style.display === 'block') {
+                hideSettingsMenu();
+            } else {
+                menu.style.display = 'block';
+                setTimeout(() => {
+                    document.addEventListener('click', hideSettingsMenu, { once: true });
+                }, 100);
+            }
+        }
+        
+        function hideSettingsMenu() {
+            document.getElementById('settings-menu').style.display = 'none';
+        }
+
+        function handleSettingsAction(action) {
+            if (action === 'bg') {
+                document.getElementById('widgetBgInput').click();
+            } else if (action === 'manage') {
+                enterSelectionMode();
+            }
+        }
+        
+        // 选择模式
+        function enterSelectionMode() {
+            selectionMode = true;
+            selectedMemoIds.clear();
+            document.getElementById('memoList').classList.add('selection-mode');
+            document.getElementById('appFooter').classList.add('selection-mode');
+            renderMemos();
+        }
+
+        function exitSelectionMode() {
+            selectionMode = false;
+            selectedMemoIds.clear();
+            document.getElementById('memoList').classList.remove('selection-mode');
+            document.getElementById('appFooter').classList.remove('selection-mode');
+            renderMemos();
+        }
+
+        function handleMemoClick(id) {
+            if (selectionMode) {
+                if (selectedMemoIds.has(id)) selectedMemoIds.delete(id);
+                else selectedMemoIds.add(id);
+                renderMemos();
+            } else {
+                openMemoModal(id);
+            }
+        }
+
+        function selectAllMemos() {
+            if (selectedMemoIds.size === memos.length) {
+                selectedMemoIds.clear(); 
+            } else {
+                selectedMemoIds.clear();
+                memos.forEach(m => selectedMemoIds.add(m.id));
+            }
+            renderMemos();
+        }
+
+        function deleteSelectedMemos() {
+            if (selectedMemoIds.size === 0) return;
+            if (confirm(`确定删除选中的 ${selectedMemoIds.size} 条备忘录吗？`)) {
+                memos = memos.filter(m => !selectedMemoIds.has(m.id));
+                saveMemosToStorage();
+                exitSelectionMode();
+                showToast('已删除');
+            }
+        }
+
+        // 桌面图片更换
+        function updateWidgetBg(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    document.getElementById('avatarUrlInput').value = e.target.result;
-                };
+                    const widget = document.getElementById('desktopWidget');
+                    widget.style.backgroundImage = `url(${e.target.result})`;
+                    showToast('图片已更改');
+                }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function saveAvatar() {
-            const url = document.getElementById('avatarUrlInput').value;
-            if (url) {
-                localStorage.setItem('user_avatar', url);
-                document.querySelector('.avatar').style.backgroundImage = `url('${url}')`;
-                closeAvatarModal();
+        // 头像预览
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var preview = document.getElementById('avatarPreview');
+                    preview.style.backgroundImage = 'url(' + e.target.result + ')';
+                    preview.style.backgroundColor = 'transparent'; 
+                    preview.style.border = 'none'; 
+                    preview.innerHTML = ''; 
+                    showToast('头像已更改');
+                }
+                reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function loadSharedData() {
-            // 同步封面
-            const sharedCover = localStorage.getItem('shared_cover_image');
-            const imgEl = document.getElementById('homeMemorialImg');
-            if (sharedCover && imgEl) {
-                let src = sharedCover;
-                if (sharedCover.startsWith('url(')) {
-                    src = sharedCover.slice(4, -1).replace(/["']/g, "");
-                }
-                if (src.startsWith('http') || src.startsWith('data:image')) {
-                    imgEl.src = src;
-                }
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // 微信菜单与添加功能
+        function toggleWeChatMenu(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('wechat-plus-menu');
+            if (menu.classList.contains('active')) {
+                menu.classList.remove('active');
+            } else {
+                menu.classList.add('active');
+                setTimeout(() => {
+                    document.addEventListener('click', hideWeChatMenu, { once: true });
+                }, 100);
             }
+        }
+
+        function hideWeChatMenu() {
+            document.getElementById('wechat-plus-menu').classList.remove('active');
+        }
+
+        function showWeChatInputModal() {
+            hideWeChatMenu();
+            document.getElementById('wechat-input-modal-mask').classList.add('active');
+            document.getElementById('wechatNewName').value = '';
+            document.getElementById('wechatNewName').focus();
+        }
+
+        function closeWeChatInputModal() {
+            document.getElementById('wechat-input-modal-mask').classList.remove('active');
+        }
+
+        function renderChatList() {
+            const list = document.getElementById('wechat-chat-list');
+            list.innerHTML = '';
             
-            // 同步置顶纪念日
-            const memorialsStr = localStorage.getItem('love_memorials');
-            if (memorialsStr) {
-                const memorials = JSON.parse(memorialsStr);
-                const pinnedItem = memorials.find(m => m.isPinned);
-                const infoEl = document.getElementById('homeMemorialInfo');
-                
-                if (pinnedItem) {
-                    const days = calculateDays(pinnedItem.date);
-                    const label = pinnedItem.type === 'future' ? '天后' : '天';
-                    document.getElementById('pinnedTitle').textContent = pinnedItem.title;
-                    document.getElementById('pinnedDays').innerHTML = `${Math.abs(days)}<small>${label}</small>`;
-                    infoEl.style.display = 'block';
-                } else {
-                    infoEl.style.display = 'none';
-                }
-            }
-        }
-
-        function calculateDays(dateStr) {
-            const targetDate = new Date(dateStr);
-            const today = new Date();
-            targetDate.setHours(0,0,0,0);
-            today.setHours(0,0,0,0);
-            const diffTime = today - targetDate;
-            return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        }
-
-        // ================== 纪念日页逻辑 ==================
-        let memorials = [];
-        let currentType = 'past';
-        let currentLongPressIndex = -1;
-
-        function loadMemoData() {
-            const savedData = localStorage.getItem('love_memorials');
-            if (savedData) {
-                memorials = JSON.parse(savedData);
-                renderList();
-            }
-            const savedCover = localStorage.getItem('page_cover');
-            if (savedCover) applyCover(savedCover);
-        }
-
-        function selectType(type, element) {
-            currentType = type;
-            document.querySelectorAll('.type-option').forEach(el => el.classList.remove('active'));
-            element.classList.add('active');
-        }
-
-        function renderList() {
-            const container = document.getElementById('listContainer');
-            // 保存添加按钮，清空其他
-            const addCard = document.querySelector('.add-card');
-            // 为了简单，我们每次都重建
-            container.innerHTML = '';
-            
-            const sortedMemorials = [...memorials].sort((a, b) => {
-                return (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0);
+            // 排序：置顶优先，然后按时间（这里简化为保持原有相对顺序，仅置顶提前）
+            // 注意：真实逻辑应该有时间戳，这里简化处理，只把置顶的移到前面
+            let displayList = [...chatListState];
+            displayList.sort((a, b) => {
+                const isPinnedA = (chatSettingsMap[a.name] && chatSettingsMap[a.name].isPinned) ? 1 : 0;
+                const isPinnedB = (chatSettingsMap[b.name] && chatSettingsMap[b.name].isPinned) ? 1 : 0;
+                return isPinnedB - isPinnedA;
             });
-            
-            sortedMemorials.forEach((item) => {
-                const originalIndex = memorials.findIndex(m => m.id === item.id);
-                const days = calculateDays(item.date);
-                const dayValue = Math.abs(days);
-                const label = item.type === 'future' ? '天后' : '天';
-                const icon = item.type === 'future' ? '<i class="fas fa-hourglass-half"></i>' : '<i class="fas fa-heart"></i>';
-                
-                const gradients = [
-                    'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)',
-                    'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
-                    'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
-                    'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)'
-                ];
-                const colorIndex = item.id % gradients.length;
-                const bgStyle = gradients[colorIndex];
-                const pinHtml = item.isPinned ? '<div class="pin-icon"><i class="fas fa-thumbtack"></i> 已置顶</div>' : '';
 
-                const cardDiv = document.createElement('div');
-                cardDiv.className = 'memo-card';
-                cardDiv.style.background = bgStyle;
-                cardDiv.innerHTML = `
-                    ${pinHtml}
-                    <div class="memo-top">
-                        <div class="memo-title">${icon} ${item.title}</div>
-                        <button class="delete-btn" onclick="deleteMemorial(${originalIndex}); event.stopPropagation();">
-                            <i class="fas fa-times"></i>
-                        </button>
+            displayList.forEach(chat => {
+                const settings = chatSettingsMap[chat.name] || {};
+                const div = document.createElement('div');
+                div.className = `wechat-item ${settings.isPinned ? 'pinned' : ''}`;
+                div.onclick = () => openChatDetail(chat.name, chat.avatarClass || '', chat.avatarText);
+                
+                // 处理备注名
+                const displayName = settings.remark || chat.name;
+                
+                // 处理头像显示内容
+                let avatarContent = chat.avatarText;
+                let avatarStyle = `background:${chat.bg}`;
+                if (settings.avatarData) {
+                    avatarContent = `<img src="${settings.avatarData}" style="width:100%;height:100%;object-fit:cover;">`;
+                    avatarStyle = 'background:transparent;';
+                }
+
+                div.innerHTML = `
+                    <div class="wechat-avatar ${chat.avatarClass || ''}" style="${avatarStyle}">${avatarContent}</div>
+                    <div class="wechat-content">
+                        <div class="wechat-row-1"><span class="wechat-name">${displayName}</span><span class="wechat-time">${chat.time}</span></div>
+                        <div class="wechat-row-2"><span class="wechat-msg">${chat.msg}</span></div>
                     </div>
-                    <div class="memo-days">
-                        <span class="day-number">${dayValue}</span>
-                        <span class="day-label">${label}</span>
-                    </div>
-                    <div class="memo-date">目标日: ${item.date}</div>
                 `;
-                addLongPressEvent(cardDiv, originalIndex);
-                container.appendChild(cardDiv);
+                list.appendChild(div);
             });
-            container.appendChild(addCard);
-        }
-        
-        function addLongPressEvent(element, index) {
-            let timer;
-            element.addEventListener('touchstart', (e) => {
-                timer = setTimeout(() => { showPinModal(index); }, 600);
-            });
-            element.addEventListener('touchend', () => clearTimeout(timer));
-            element.addEventListener('touchmove', () => clearTimeout(timer));
-            element.addEventListener('mousedown', () => {
-                timer = setTimeout(() => { showPinModal(index); }, 600);
-            });
-            element.addEventListener('mouseup', () => clearTimeout(timer));
-            element.addEventListener('mouseleave', () => clearTimeout(timer));
-        }
+            
+            // 渲染通讯录 - 好友列表 & 群聊列表
+            const friendsList = document.getElementById('contact-list-friends');
+            const groupsList = document.getElementById('contact-list-groups');
+            friendsList.innerHTML = '';
+            groupsList.innerHTML = '';
+            
+            chatListState.forEach(chat => {
+                if (['订阅号消息', '游戏中心', '文件传输助手'].includes(chat.name)) return;
+                
+                const settings = chatSettingsMap[chat.name] || {};
+                const displayName = settings.remark || chat.name;
+                const isGroup = chat.avatarClass === 'group' || !!settings.members;
+                
+                // 头像逻辑
+                let avatarContent = chat.avatarText;
+                let avatarStyle = '';
+                
+                if (isGroup) {
+                     // 群聊样式
+                     avatarContent = chat.avatarText || '👥';
+                     avatarStyle = `background:${chat.bg || '#eeeeee'};border-radius:4px;display:flex;justify-content:center;align-items:center;color:#333;font-size:20px;width:36px;height:36px;margin-right:12px;flex-shrink:0;`;
+                     if (settings.avatarData) {
+                        avatarContent = `<img src="${settings.avatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;">`;
+                        avatarStyle = `background:transparent;width:36px;height:36px;margin-right:12px;flex-shrink:0;`;
+                     }
+                } else {
+                     // 好友样式
+                     avatarStyle = `background:${chat.bg || '#ddd'};border-radius:4px;display:flex;justify-content:center;align-items:center;color:#fff;font-size:14px;width:36px;height:36px;margin-right:12px;flex-shrink:0;`;
+                     if (settings.avatarData) {
+                        avatarContent = `<img src="${settings.avatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;">`;
+                        avatarStyle = `background:transparent;width:36px;height:36px;margin-right:12px;flex-shrink:0;`;
+                     } else {
+                         // 默认头像
+                         if (!avatarContent) avatarContent = displayName[0];
+                         // 如果是emoji，调整大小
+                         if (avatarContent.match && avatarContent.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/)) {
+                             avatarStyle += 'font-size:20px;background:transparent;';
+                         }
+                     }
+                }
 
-        function showPinModal(index) {
-            currentLongPressIndex = index;
-            document.getElementById('pinModalOverlay').style.display = 'flex';
-        }
-        function closePinModal() {
-            document.getElementById('pinModalOverlay').style.display = 'none';
-            currentLongPressIndex = -1;
-        }
-        function pinCurrent() {
-            if (currentLongPressIndex > -1) {
-                memorials.forEach(m => m.isPinned = false);
-                memorials[currentLongPressIndex].isPinned = true;
-                saveAndRefresh();
-                closePinModal();
+                const div = document.createElement('div');
+                div.className = 'wechat-cell';
+                div.onclick = () => openChatDetail(chat.name, chat.avatarClass || (isGroup ? 'group' : ''), chat.avatarText);
+                div.innerHTML = `
+                    <div style="${avatarStyle}">${avatarContent}</div>
+                    <div class="wechat-cell-text">${displayName}</div>
+                `;
+                
+                if (isGroup) {
+                    groupsList.appendChild(div);
+                } else {
+                    friendsList.appendChild(div);
+                }
+            });
+            
+            // 如果列表为空，显示提示
+            if (friendsList.children.length === 0) {
+                friendsList.innerHTML = '<div style="padding:15px;text-align:center;color:#ccc;font-size:13px;">暂无好友</div>';
             }
-        }
-        function unpinCurrent() {
-            if (currentLongPressIndex > -1) {
-                memorials[currentLongPressIndex].isPinned = false;
-                saveAndRefresh();
-                closePinModal();
-            }
-        }
-        function saveAndRefresh() {
-            localStorage.setItem('love_memorials', JSON.stringify(memorials));
-            renderList();
-        }
-        
-        function openModal() { document.getElementById('modalOverlay').style.display = 'flex'; }
-        function closeModal() {
-            document.getElementById('modalOverlay').style.display = 'none';
-            document.getElementById('titleInput').value = '';
-        }
-
-        function saveMemorial() {
-            const title = document.getElementById('titleInput').value.trim();
-            const date = document.getElementById('dateInput').value;
-            if (!title || !date) { alert('请填写完整信息'); return; }
-            memorials.push({
-                title: title, date: date, type: currentType, id: Date.now(), isPinned: false
-            });
-            localStorage.setItem('love_memorials', JSON.stringify(memorials));
-            renderList();
-            closeModal();
-        }
-
-        function deleteMemorial(index) {
-            if(confirm('确定要删除这个纪念日吗？')) {
-                memorials.splice(index, 1);
-                localStorage.setItem('love_memorials', JSON.stringify(memorials));
-                renderList();
+            if (groupsList.children.length === 0) {
+                groupsList.innerHTML = '<div style="padding:15px;text-align:center;color:#ccc;font-size:13px;">暂无群聊</div>';
             }
         }
 
-        function toggleMenu() {
-            const menu = document.getElementById('dropdownMenu');
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        function confirmWeChatAdd() {
+            const name = document.getElementById('wechatNewName').value.trim();
+            if (!name) {
+                showToast('请输入名字');
+                return;
+            }
+            
+            // 检查是否已存在
+            if (chatListState.some(c => c.name === name)) {
+                showToast('好友已存在');
+                closeWeChatInputModal();
+                openChatDetail(name, 'blue', name[0]);
+                return;
+            }
+
+            // 添加新数据
+            const newChat = {
+                name: name,
+                avatarClass: 'blue',
+                avatarText: name[0],
+                bg: '#10aeff',
+                time: '刚刚',
+                msg: '' // 无默认消息
+            };
+            
+            chatListState.unshift(newChat);
+            saveChatListToStorage();
+            renderChatList();
+
+            closeWeChatInputModal();
+            showToast('已添加');
+            
+            openChatDetail(name, 'blue', name[0]);
+        }
+        
+        function deleteCurrentContact() {
+            showIOSDialog(
+                '删除联系人',
+                `确定要删除“${currentChatUser}”吗？这将清空相关数据。`,
+                () => {
+                    // 1. 从列表数据中移除
+                    chatListState = chatListState.filter(c => c.name !== currentChatUser);
+                    saveChatListToStorage();
+                    
+                    // 2. 移除设置数据
+                    if (chatSettingsMap[currentChatUser]) {
+                        delete chatSettingsMap[currentChatUser];
+                        saveChatSettingsToStorage();
+                    }
+                    
+                    // 3. 重新渲染并关闭
+                    renderChatList();
+                    closeChatSettings();
+                    closeChatDetail();
+                    showToast('已删除');
+                },
+                null,
+                '取消',
+                '删除'
+            );
         }
 
-        function openCoverModal() {
-            document.getElementById('coverModalOverlay').style.display = 'flex';
-            toggleMenu();
+        // 群聊相关逻辑
+        function showGroupCreateModal() {
+            hideWeChatMenu();
+            const modal = document.getElementById('wechat-group-create-modal');
+            const list = document.getElementById('group-contact-list');
+            list.innerHTML = '';
+
+            // 过滤出可拉入群聊的好友（排除系统号和自己）
+            const friends = chatListState.filter(c => 
+                !['订阅号消息', '游戏中心', '文件传输助手'].includes(c.name)
+            );
+
+            if (friends.length === 0) {
+                list.innerHTML = '<div style="padding:20px;text-align:center;color:#999;">暂无好友可选</div>';
+            } else {
+                friends.forEach(friend => {
+                    const settings = chatSettingsMap[friend.name] || {};
+                    const displayName = settings.remark || friend.name;
+                    
+                    // 头像逻辑
+                    let avatarContent = friend.avatarText;
+                    let avatarStyle = `background:${friend.bg || '#ddd'};border-radius:4px;display:flex;justify-content:center;align-items:center;color:#fff;font-size:12px;width:36px;height:36px;margin-right:12px;`;
+                    if (settings.avatarData) {
+                        avatarContent = `<img src="${settings.avatarData}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;">`;
+                        avatarStyle = `background:transparent;width:36px;height:36px;margin-right:12px;`;
+                    } else if (!avatarContent && friend.avatarClass) {
+                        // 兼容 class
+                         avatarStyle = `background:${friend.bg || '#ddd'};border-radius:4px;display:flex;justify-content:center;align-items:center;color:#fff;font-size:12px;width:36px;height:36px;margin-right:12px;`;
+                         // 简单处理，如果没内容就显示首字
+                         if(!avatarContent) avatarContent = displayName[0];
+                    }
+
+                    const div = document.createElement('div');
+                    div.className = 'wechat-cell';
+                    div.style.padding = '10px 15px';
+                    // 点击整个行切换 checkbox
+                    div.onclick = (e) => {
+                        const cb = div.querySelector('input[type="checkbox"]');
+                        if (e.target !== cb) {
+                            cb.checked = !cb.checked;
+                        }
+                    };
+
+                    div.innerHTML = `
+                        <div style="${avatarStyle}">${avatarContent}</div>
+                        <div class="wechat-cell-text" style="font-size:16px;">${displayName}</div>
+                        <input type="checkbox" value="${friend.name}" style="width:20px;height:20px;accent-color:#07C160;">
+                    `;
+                    list.appendChild(div);
+                });
+            }
+
+            modal.classList.add('active');
         }
-        function closeCoverModal() { document.getElementById('coverModalOverlay').style.display = 'none'; }
-        function setQuickCover(value) { document.getElementById('coverInput').value = value; }
+
+        function closeGroupCreateModal() {
+            document.getElementById('wechat-group-create-modal').classList.remove('active');
+        }
         
-        function handleFileUpload(input) {
+        function createGroupChat() {
+            const list = document.getElementById('group-contact-list');
+            const checkboxes = list.querySelectorAll('input[type="checkbox"]:checked');
+            
+            if (checkboxes.length === 0) {
+                showToast('请至少选择一个好友');
+                return;
+            }
+
+            const selectedNames = Array.from(checkboxes).map(cb => cb.value);
+            // 生成群名（取前三个名字 + 等）
+            let groupName = selectedNames.slice(0, 3).join('、');
+            if (selectedNames.length > 3) groupName += '等';
+            groupName += `(${selectedNames.length + 1})`; // +1 包含自己
+
+            // 检查是否已存在同名群聊（简单检查）
+            if (chatListState.some(c => c.name === groupName)) {
+                // 如果存在，为了演示效果，加个时间戳或者随机数
+                groupName += '_' + Math.floor(Math.random() * 100);
+            }
+
+            // 创建新会话
+            const newChat = {
+                name: groupName,
+                avatarClass: 'group', // 特殊标识
+                avatarText: '👥',
+                bg: '#eeeeee',
+                time: '刚刚',
+                msg: '你创建了群聊'
+            };
+
+            // 添加到列表顶部
+            chatListState.unshift(newChat);
+            saveChatListToStorage();
+            
+            // 初始化群聊设置
+            chatSettingsMap[groupName] = {
+                remark: groupName, // 默认备注也是群名
+                friendPersona: '群聊成员', // 简单预设
+                myPersona: '',
+                members: selectedNames // 保存群成员列表
+            };
+            saveChatSettingsToStorage();
+
+            renderChatList();
+            closeGroupCreateModal();
+            
+            // 打开新群聊
+            openChatDetail(groupName, 'group', '👥');
+            
+            // 发一条系统消息
+            addChatMessage(groupName, `你邀请 ${selectedNames.join('、')} 加入了群聊`, false); // 这里稍微 hack 一下，群聊系统消息也当作对方消息显示，或者可以在 addChatMessage 里扩展 logic
+        }
+
+        // 聊天设置相关
+        function openChatSettings() {
+            const modal = document.getElementById('wechat-settings-modal');
+            const data = chatSettingsMap[currentChatUser] || {};
+            const isGroup = !!data.members;
+
+            // 更新界面文案
+            document.getElementById('labelFriendName').innerText = isGroup ? '群聊名称' : '好友姓名';
+            document.getElementById('labelFriendAvatar').innerText = isGroup ? '群聊头像' : '好友头像';
+            document.getElementById('titleFriendPersona').innerText = isGroup ? '群聊设定' : '好友人设';
+
+            // 重置临时数据
+            tempAvatarData = null;
+            tempBgData = null;
+            tempMyAvatarData = null;
+
+            document.getElementById('wsFriendName').value = currentChatUser;
+            document.getElementById('wsRemark').value = data.remark || '';
+            document.getElementById('wsFriendPersona').value = data.friendPersona || '';
+            document.getElementById('wsMyPersona').value = data.myPersona || '';
+            document.getElementById('wsMemoryThreshold').value = data.memoryThreshold || '';
+            document.getElementById('wsCustomCss').value = data.customCss || '';
+            
+            // 初始化置顶开关
+            document.getElementById('wsIsPinned').checked = !!data.isPinned;
+            
+            // 预览背景状态
+            const bgPreview = document.getElementById('wsBgPreview');
+            if (data.chatBg) {
+                 bgPreview.innerHTML = '<img src="' + data.chatBg + '" style="width:100%;height:100%;object-fit:cover;">';
+                 bgPreview.style.background = 'transparent';
+            } else {
+                 bgPreview.innerText = '默认';
+                 bgPreview.style.background = 'transparent';
+            }
+            
+            // 预览“我的头像”
+            const myAvatarDiv = document.getElementById('wsMyAvatar');
+            myAvatarDiv.innerHTML = '';
+            if (data.myAvatarData) {
+                myAvatarDiv.style.background = 'transparent';
+                myAvatarDiv.innerHTML = `<img src="${data.myAvatarData}" style="width:100%;height:100%;object-fit:cover;">`;
+            } else {
+                myAvatarDiv.style.background = '#eee';
+                myAvatarDiv.innerText = 'ME';
+                myAvatarDiv.style.color = '#333';
+            }
+
+            // 渲染设置页中的记忆列表
+            renderSettingsMemoryList();
+
+            // 头像显示
+            const avatarDiv = document.getElementById('wsFriendAvatar');
+            avatarDiv.innerHTML = ''; // 清空
+            avatarDiv.className = `ws-avatar-preview ${currentChatColor}`;
+            
+            if (data.avatarData) {
+                // 有自定义头像
+                avatarDiv.style.background = 'transparent';
+                avatarDiv.innerHTML = `<img src="${data.avatarData}" style="width:100%;height:100%;object-fit:cover;">`;
+            } else {
+                // 默认逻辑
+                if (currentChatUser.length === 1 || !currentChatAvatar.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/)) {
+                     // 可能是名字缩写或文本
+                     avatarDiv.style.background = currentChatColor === 'green' ? '#07C160' : (currentChatColor === 'orange' ? '#fa9d3b' : '#10aeff');
+                     avatarDiv.innerText = currentChatAvatar;
+                } else {
+                     // 可能是Emoji
+                     avatarDiv.style.background = 'transparent';
+                     avatarDiv.innerText = currentChatAvatar;
+                     avatarDiv.style.fontSize = '24px';
+                }
+            }
+
+            // 初始化样式预览
+            initSettingsShadowDom(data.customCss || '');
+            modal.classList.add('active');
+        }
+
+        function closeChatSettings() {
+            document.getElementById('wechat-settings-modal').classList.remove('active');
+        }
+        
+        // 预览设置中的头像
+        function previewSettingsAvatar(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(e) { document.getElementById('coverInput').value = e.target.result; };
+                reader.onload = function(e) {
+                    tempAvatarData = e.target.result;
+                    const avatarDiv = document.getElementById('wsFriendAvatar');
+                    avatarDiv.style.background = 'transparent';
+                    avatarDiv.innerHTML = `<img src="${tempAvatarData}" style="width:100%;height:100%;object-fit:cover;">`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        
+        // 预览设置中的背景
+        function previewSettingsBg(input) {
+             if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempBgData = e.target.result;
+                    const bgPreview = document.getElementById('wsBgPreview');
+                    bgPreview.style.background = 'transparent';
+                    bgPreview.innerHTML = `<img src="${tempBgData}" style="width:100%;height:100%;object-fit:cover;">`;
+                }
                 reader.readAsDataURL(input.files[0]);
             }
         }
 
-        function saveCover() {
-            const cover = document.getElementById('coverInput').value;
-            if(cover) {
-                localStorage.setItem('shared_cover_image', cover);
-                alert("已更新主页纪念日封面");
-                closeCoverModal();
+        // 预览设置中的“我的头像”
+        function previewSettingsMyAvatar(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempMyAvatarData = e.target.result;
+                    const myAvatarDiv = document.getElementById('wsMyAvatar');
+                    myAvatarDiv.style.background = 'transparent';
+                    myAvatarDiv.innerHTML = `<img src="${tempMyAvatarData}" style="width:100%;height:100%;object-fit:cover;">`;
+                }
+                reader.readAsDataURL(input.files[0]);
             }
         }
-        
-        function applyCover(value) {
-            const overlay = document.getElementById('bgOverlay');
-            if (value.startsWith('url') || value.startsWith('http') || value.startsWith('data:image')) {
-                const bgValue = (value.startsWith('http') || value.startsWith('data:image')) ? `url(${value})` : value;
-                overlay.style.backgroundImage = bgValue;
-                overlay.style.background = bgValue + " center/cover no-repeat";
+
+        function saveChatSettings() {
+            const newName = document.getElementById('wsFriendName').value.trim();
+            const remark = document.getElementById('wsRemark').value.trim();
+            const fPersona = document.getElementById('wsFriendPersona').value;
+            const mPersona = document.getElementById('wsMyPersona').value;
+            const isPinned = document.getElementById('wsIsPinned').checked;
+            const customCss = document.getElementById('wsCustomCss').value;
+            
+            if (!newName) {
+                showToast('姓名不能为空');
+                return;
+            }
+
+            // 处理改名逻辑
+            if (newName !== currentChatUser) {
+                // 检查重名
+                if (chatListState.some(c => c.name === newName)) {
+                    showToast('该名字已存在');
+                    return;
+                }
+                
+                // 更新 chatListState
+                const chatIdx = chatListState.findIndex(c => c.name === currentChatUser);
+                if (chatIdx !== -1) {
+                    chatListState[chatIdx].name = newName;
+                }
+                
+                // 迁移 settings
+                chatSettingsMap[newName] = chatSettingsMap[currentChatUser] || {};
+                delete chatSettingsMap[currentChatUser];
+                
+                // 更新当前指针
+                currentChatUser = newName;
+            }
+            
+            // 确保对象存在
+            if (!chatSettingsMap[currentChatUser]) chatSettingsMap[currentChatUser] = {};
+            
+            // 更新字段
+            chatSettingsMap[currentChatUser].remark = remark;
+            chatSettingsMap[currentChatUser].friendPersona = fPersona;
+            chatSettingsMap[currentChatUser].myPersona = mPersona;
+            chatSettingsMap[currentChatUser].isPinned = isPinned;
+            chatSettingsMap[currentChatUser].customCss = customCss;
+            
+            // 记忆阈值
+            const memThreshold = parseInt(document.getElementById('wsMemoryThreshold').value);
+            if (memThreshold > 0) {
+                chatSettingsMap[currentChatUser].memoryThreshold = memThreshold;
             } else {
-                overlay.style.background = value;
+                delete chatSettingsMap[currentChatUser].memoryThreshold; // 恢复默认逻辑
             }
-            overlay.style.opacity = '1';
+            
+            // 更新头像
+            if (tempAvatarData) {
+                chatSettingsMap[currentChatUser].avatarData = tempAvatarData;
+            }
+            
+            // 更新背景
+            if (tempBgData) {
+                chatSettingsMap[currentChatUser].chatBg = tempBgData;
+            }
+            
+            // 更新我的头像
+            if (tempMyAvatarData) {
+                chatSettingsMap[currentChatUser].myAvatarData = tempMyAvatarData;
+            }
+            
+            saveChatSettingsToStorage();
+            saveChatListToStorage();
+            
+            // 刷新界面
+            renderChatList();
+            
+            // 更新详情页标题
+            document.getElementById('chatTitle').innerText = remark || currentChatUser;
+            
+            // 立即应用新背景
+            const data = chatSettingsMap[currentChatUser];
+            const detailPage = document.getElementById('wechat-chat-detail');
+            if (data.chatBg) {
+                detailPage.style.backgroundImage = `url(${data.chatBg})`;
+                detailPage.style.backgroundSize = 'cover';
+                detailPage.style.backgroundPosition = 'center';
+            } else {
+                detailPage.style.backgroundImage = 'none';
+                detailPage.style.backgroundColor = '#ededed';
+            }
+            
+            // 立即应用新 CSS
+            document.getElementById('dynamic-chat-style').innerHTML = customCss || '';
+            
+            showToast('设置已保存');
+            closeChatSettings();
         }
+
+        // 初始化和更新样式预览
+        function initSettingsShadowDom(initialCss) {
+            const container = document.getElementById('wsBubblePreviewContainer');
+            // 清空旧的 Shadow Root
+            if (shadowRoot) {
+                // Shadow Root 不能删除，只能清空内容
+                shadowRoot.innerHTML = '';
+            } else {
+                shadowRoot = container.attachShadow({mode: 'open'});
+            }
+
+            // 基础样式 (复刻 index.html 里的气泡相关样式)
+            const baseStyle = `
+                * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "San Francisco", "Helvetica Neue", Helvetica, Arial, sans-serif; }
+                .preview-box { padding: 15px; display: flex; flex-direction: column; gap: 15px; }
+                .chat-msg-row { display: flex; align-items: flex-start; gap: 10px; }
+                .chat-msg-row.self { flex-direction: row-reverse; }
+                .chat-avatar { width: 36px; height: 36px; border-radius: 4px; background: #ddd; flex-shrink: 0; display:flex; justify-content:center; align-items:center; color:white; font-size: 14px; }
+                .chat-msg-content { display: flex; flex-direction: column; align-items: flex-start; max-width: 80%; }
+                .chat-msg-row.self .chat-msg-content { align-items: flex-end; }
+                .chat-bubble { padding: 10px 12px; border-radius: 4px; font-size: 14px; line-height: 1.4; position: relative; background: #fff; color: #000; }
+                .chat-msg-row:not(.self) .chat-bubble::before { content: ""; position: absolute; top: 12px; left: -6px; width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-right: 6px solid #fff; }
+                .chat-msg-row.self .chat-bubble { background: #95ec69; color: #000; }
+                .chat-msg-row.self .chat-bubble::before { content: ""; position: absolute; top: 12px; right: -6px; width: 0; height: 0; border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-left: 6px solid #95ec69; }
+            `;
+
+            // 构造 Shadow DOM 内容
+            shadowRoot.innerHTML = `
+                <style>${baseStyle}</style>
+                <style id="preview-custom-style">${initialCss}</style>
+                <div class="preview-box">
+                    <div class="chat-msg-row">
+                        <div class="chat-avatar">TA</div>
+                        <div class="chat-msg-content">
+                            <div class="chat-bubble">对方的消息气泡</div>
+                        </div>
+                    </div>
+                    <div class="chat-msg-row self">
+                        <div class="chat-avatar" style="background:#eee;color:#333;">ME</div>
+                        <div class="chat-msg-content">
+                            <div class="chat-bubble">我的消息气泡</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function updateBubblePreview() {
+            if (!shadowRoot) return;
+            const css = document.getElementById('wsCustomCss').value;
+            const styleTag = shadowRoot.getElementById('preview-custom-style');
+            if (styleTag) {
+                styleTag.innerHTML = css;
+            }
+        }
+
+        // ================= 记忆管理（设置页版） =================
+
+        function renderSettingsMemoryList() {
+            const settings = chatSettingsMap[currentChatUser] || {};
+            const memories = settings.memoryList || [];
+            const container = document.getElementById('wsMemoryListContainer');
+            container.innerHTML = '';
+
+            if (memories.length === 0) {
+                container.innerHTML = '<div style="padding:15px;text-align:center;color:#999;font-size:14px;">暂无记忆摘要</div>';
+                return;
+            }
+
+            // 倒序显示，为了方便操作，给每个 item 绑定原始 index
+            const displayList = memories.map((m, i) => ({...m, originalIndex: i})).reverse();
+
+            displayList.forEach(mem => {
+                const div = document.createElement('div');
+                div.style.borderBottom = '1px solid #f0f0f0';
+                div.style.padding = '12px 15px';
+                div.id = `ws-memory-item-${mem.originalIndex}`;
+                
+                // 正常显示视图
+                const viewHTML = `
+                    <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                        <span style="font-size:12px;color:#999;">${mem.time}</span>
+                        <div style="display:flex;gap:15px;">
+                            <span style="font-size:13px;color:#576b95;cursor:pointer;" onclick="toggleEditMemoryInSettings(${mem.originalIndex})">编辑</span>
+                            <span style="font-size:13px;color:#ff3b30;cursor:pointer;" onclick="deleteMemoryInSettings(${mem.originalIndex})">删除</span>
+                        </div>
+                    </div>
+                    <div style="font-size:15px;line-height:1.5;color:#333;white-space:pre-wrap;">${mem.content}</div>
+                `;
+
+                // 编辑视图
+                const editHTML = `
+                    <div style="margin-bottom:8px;font-size:13px;color:#999;">编辑记忆</div>
+                    <textarea id="ws-memory-edit-${mem.originalIndex}" class="ws-textarea" style="background:#f9f9f9;padding:8px;border-radius:4px;border:1px solid #eee;min-height:100px;">${mem.content}</textarea>
+                    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:8px;">
+                        <div class="ws-btn cancel" style="padding:6px 15px;font-size:14px;min-width:auto;" onclick="toggleEditMemoryInSettings(${mem.originalIndex})">取消</div>
+                        <div class="ws-btn save" style="padding:6px 15px;font-size:14px;min-width:auto;" onclick="saveMemoryEditInSettings(${mem.originalIndex})">保存</div>
+                    </div>
+                `;
+
+                div.innerHTML = viewHTML;
+                div.dataset.editMode = 'false';
+                div.dataset.viewHtml = viewHTML;
+                div.dataset.editHtml = editHTML;
+                
+                container.appendChild(div);
+            });
+        }
+
+        function addManualMemoryFromSettings() {
+            const content = prompt("请输入记忆内容：");
+            if (content && content.trim()) {
+                const settings = chatSettingsMap[currentChatUser];
+                if (!settings.memoryList) settings.memoryList = [];
+                // 添加到列表
+                settings.memoryList.push({
+                    time: new Date().toLocaleString(),
+                    content: content.trim()
+                });
+                saveChatSettingsToStorage();
+                renderSettingsMemoryList();
+                updateMemoryBar(); // 刷新聊天界面顶部的条
+                
+                // 如果悬浮面板也是开着的，顺便刷新一下（虽然此时被设置弹窗挡住看不见）
+                if (document.getElementById('memory-list-panel').classList.contains('active')) {
+                    renderMemoryList();
+                }
+                showToast("已添加记忆");
+            }
+        }
+
+        function toggleEditMemoryInSettings(index) {
+            const div = document.getElementById(`ws-memory-item-${index}`);
+            if (!div) return;
+            
+            const isEdit = div.dataset.editMode === 'true';
+            
+            if (isEdit) {
+                // 切换回查看
+                div.innerHTML = div.dataset.viewHtml;
+                div.dataset.editMode = 'false';
+            } else {
+                // 切换到编辑
+                div.innerHTML = div.dataset.editHtml;
+                div.dataset.editMode = 'true';
+            }
+        }
+
+        function saveMemoryEditInSettings(index) {
+            const textarea = document.getElementById(`ws-memory-edit-${index}`);
+            if (!textarea) return;
+            
+            const newContent = textarea.value.trim();
+            if (!newContent) {
+                showToast('内容不能为空');
+                return;
+            }
+            
+            const settings = chatSettingsMap[currentChatUser];
+            if (settings && settings.memoryList && settings.memoryList[index]) {
+                settings.memoryList[index].content = newContent;
+                saveChatSettingsToStorage();
+                showToast('记忆已更新');
+                renderSettingsMemoryList();
+                
+                // 同步更新悬浮面板（如果存在）
+                if (document.getElementById('memory-list-panel').classList.contains('active')) {
+                    renderMemoryList();
+                }
+            }
+        }
+
+        function deleteMemoryInSettings(index) {
+            showIOSDialog(
+                '删除记忆',
+                '确定要删除这条记忆吗？',
+                () => {
+                    const settings = chatSettingsMap[currentChatUser];
+                    if (settings && settings.memoryList) {
+                        settings.memoryList.splice(index, 1);
+                        saveChatSettingsToStorage();
+                        showToast('记忆已删除');
+                        renderSettingsMemoryList();
+                        updateMemoryBar();
+                        
+                        // 同步更新悬浮面板
+                        if (document.getElementById('memory-list-panel').classList.contains('active')) {
+                            renderMemoryList();
+                        }
+                    }
+                },
+                null,
+                '取消',
+                '删除'
+            );
+        }
+
     </script>
 </body>
 </html>
